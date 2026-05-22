@@ -1,0 +1,19 @@
+{
+  "name": "duhok-ecommerce",
+  "version": "1.0.0",
+  "description": "Multi-tenant e-commerce for Duhok shops",
+  "private": true,
+  "scripts": {
+    "dev":           "concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend dev\"",
+    "dev:frontend":  "pnpm --filter frontend dev",
+    "dev:backend":   "pnpm --filter backend dev",
+    "build":         "pnpm --filter frontend build && pnpm --filter backend build",
+    "migrate":       "pnpm --filter database migrate",
+    "migrate:undo":  "pnpm --filter database migrate:undo",
+    "seed":          "pnpm --filter database seed",
+    "seed:undo":     "pnpm --filter database seed:undo"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

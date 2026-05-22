@@ -1,0 +1,9 @@
+// WHAT: Tells Sequelize CLI where to find config, migrations, seeders
+// USED BY: sequelize-cli automatically reads this file
+// NOTE: No models folder here — models live in backend/src/models/ only!
+const path = require('path')
+module.exports = {
+  'config':          path.resolve('config', 'database.js'),
+  'seeders-path':    path.resolve('seeders'),
+  'migrations-path': path.resolve('migrations')
+}
