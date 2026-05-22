@@ -1,0 +1,6 @@
+# WHAT: Links frontend, backend, database as one monorepo
+# WHY: pnpm install at root installs ALL at once
+packages:
+  - 'frontend'
+  - 'backend'
+  - 'database'

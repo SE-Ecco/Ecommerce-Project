@@ -1,0 +1,18 @@
+// WHAT: Registers ALL model relationships (foreign keys, associations)
+// IMPORTS: Shop, User, Category, Product, Order, OrderItem models
+// USED BY: config/database.ts (imported once at startup)
+// RELATIONS:
+//   Shop      hasMany → Users      (shop_id)
+//   Shop      hasMany → Categories (shop_id)
+//   Shop      hasMany → Products   (shop_id)
+//   Shop      hasMany → Orders     (shop_id)
+//   Shop      hasMany → OrderItems (shop_id)
+//   User      hasMany → Orders     (user_id)
+//   Category  hasMany → Products   (category_id)
+//   Order     hasMany → OrderItems (order_id)
+//   Order     belongsTo → User     (user_id)
+//   Order     belongsTo → Shop     (shop_id)
+//   OrderItem belongsTo → Order    (order_id)
+//   OrderItem belongsTo → Product  (product_id)
+//   Product   belongsTo → Category (category_id)
+//   Product   belongsTo → Shop     (shop_id)

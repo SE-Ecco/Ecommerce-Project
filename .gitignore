@@ -1,0 +1,22 @@
+# Dependencies — never push these (huge!)
+node_modules/
+.pnpm-store/
+
+# Environment files — NEVER push (contain secrets!)
+.env
+.env.local
+.env.production
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+
+# TypeScript cache
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db

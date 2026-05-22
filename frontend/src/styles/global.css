@@ -1,0 +1,4 @@
+/* WHAT: Global styles — applied to the whole app
+   IMPORTS: tailwindcss (all utility classes come from here)
+   USED BY: main.tsx imports this once */
+@import "tailwindcss";
