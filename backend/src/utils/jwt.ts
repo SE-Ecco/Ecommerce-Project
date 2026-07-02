@@ -3,9 +3,10 @@
 // USED BY: services/auth.service.ts (generate), middleware/auth.middleware.ts (verify)
 // CONTAINS: generateToken(payload), verifyToken(token)
 import jwt from 'jsonwebtoken'
-import { env } from '@/config/env'
+import { env } from 'src/config/env'
+import { TokenPayload } from '../types'
 
-export const generateToken = (payload: object): string =>{
+export const generateToken = (payload: TokenPayload): string => {
     return jwt.sign(
         payload,                // data stored inside token
         env.JWT_SECRET,         // secret key used to sign token
