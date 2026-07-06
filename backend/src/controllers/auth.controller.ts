@@ -3,7 +3,7 @@
 // USED BY: routes/auth.routes.ts
 // HANDLES: POST /api/auth/register, POST /api/auth/login, GET /api/auth/me
 // RULE: controller is THIN — receives request, calls service, sends response. nothing else!
-
+import { successResponse, errorResponse } from '../utils/response';
 import { Request, Response } from 'express'  // Request = req type, Response = res type
 import * as authService from '../services/auth.service' // import all service functions
 
@@ -27,13 +27,13 @@ export const register = async (
     // await → service is async, wait for it to finish
     // result = { user: {...}, token: "eyJhbG..." }
 
-    res.status(201).json({ success: true, data: result });
+    res.status(201).json(successResponse(result));
     // 201 = Created — something new was created in database ✅
     // .json() → sends response as JSON to client
 
   } catch (error) {
     // service threw an error (e.g. "Email already exists")
-    res.status(400).json({ message: (error as Error).message });
+    res.status(400).json(errorResponse((error as Error).message));
     // 400 = Bad Request — client sent invalid data
     // (error as Error).message → safely gets error message as string
   }
@@ -58,12 +58,12 @@ export const login = async (
     //   find user → compare password → generate token
     // result = { user: {...}, token: "eyJhbG..." }
 
-    res.status(200).json({ success: true, data: result });
+     res.status(200).json(successResponse(result));
     // 200 = OK — success, nothing new created
 
   } catch (error) {
     // service threw error (e.g. "Invalid email or password")
-    res.status(401).json({ message: (error as Error).message });
+    res.status(401).json(errorResponse((error as Error).message));
     // 401 = Unauthorized — wrong credentials 🔒
   }
 };
@@ -84,12 +84,12 @@ export const getMe = async (
     //      safe because authenticate() middleware runs before this
     // call service → finds user in DB by id
 
-    res.status(200).json({ success: true, data: result });
+     res.status(200).json(successResponse(result));
     // 200 = OK — just reading data, nothing created
 
   } catch (error) {
     // service threw error (e.g. "User not found")
-    res.status(404).json({ message: (error as Error).message });
+    res.status(404).json(errorResponse((error as Error).message));
     // 404 = Not Found — user doesn't exist in DB
   }
 };
