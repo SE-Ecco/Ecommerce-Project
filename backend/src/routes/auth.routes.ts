@@ -5,3 +5,5 @@
 //   POST /api/auth/register → [authLimiter, registerValidation, validate] → register()
 //   POST /api/auth/login    → [authLimiter, loginValidation, validate]    → login()
 //   GET  /api/auth/me       → [authenticate]                              → getMe()
+
+console.log('Hello')
