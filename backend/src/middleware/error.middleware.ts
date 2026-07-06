@@ -30,7 +30,11 @@ export const errorMiddleware = (
 // so YOU (developer) can debug it 🔍
 // customer never sees this
 
-   res.status(500).json(errorResponse(err.message))
+   const message = process.env.NODE_ENV === 'production'
+     ? 'Something went wrong. Please try again later.'
+     : err.message;
+
+   res.status(500).json(errorResponse(message))
 
 
 //    res.status(500) → tell browser "server error happened" 💥
