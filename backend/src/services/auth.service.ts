@@ -52,7 +52,9 @@ export const register = async (
   const token = generateToken(payload); // jwt.sign(payload, secret, { expiresIn: '7d' })
   // token = long string like "eyJhbGciOiJIUzI1NiJ9.abc123..."
 
-  return { user: newUser, token }; // sent back to controller → controller sends to client
+ const { password: _, ...safeUser } = newUser.toJSON();
+return { user: safeUser, token };
+ // sent back to controller → controller sends to client
 };
 
 // ===========================
@@ -87,7 +89,8 @@ export const login = async (
   };
 
   const token = generateToken(payload); // create token with 7 day expiry
-  return { user, token }; // sent back to controller → controller sends to client
+  const { password: _, ...safeUser } = user.toJSON();
+  return { user: safeUser, token }; // sent back to controller → controller sends to client
 };
 
 // ===========================
@@ -102,7 +105,8 @@ export const getMe = async (id: number) => {
 
   if (!user) throw new Error('User not found');
   // shouldn't happen (token is valid = user exists) but safety check ✅
-  return user; // sent back to controller
+  const { password: _, ...safeUser } = user.toJSON();
+  return safeUser; // sent back to controller
 };
 
 /*
