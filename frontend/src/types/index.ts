@@ -4,6 +4,16 @@
 // CONTAINS:
 //
 //   User     → id, shop_id, full_name, email, phone, role, created_at
+type user = {
+    id: number;
+    shop_id: number;
+    full_name: string;
+    email: string;
+    phone: number;
+    role: 'super_admin' | 'customer' | 'shop_admin';
+    created_at: string;
+};
+
 //   Shop     → id, name, slug, description, logo_url, is_active, created_at
 //   Category → id, shop_id, name, created_at
 //   Product  → id, shop_id, category_id, name, description, price, stock, image_url, is_available, created_at
