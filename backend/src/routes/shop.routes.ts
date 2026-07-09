@@ -5,7 +5,7 @@
 //   GET /api/shops                  → getAllShops()
 //   GET /api/shops/slug/:slug       → getShopBySlug()
 //   GET /api/shops/:id/products     → getShopProducts()
-//   GET /api/shops/:id/categories   → getShopCategories()
+//   GET /api/shops/:id/categories   → getShopCategories()-
 
 import { getAllShops,getShopBySlug } from '../controllers/shop.controller'
 
@@ -19,7 +19,7 @@ router.get('/slug/:slug', getShopBySlug)
 export default router
 
 
-
+// 📖 shop.routes.ts 
 // 📖 shop.routes.ts — step by step 🍽️
 // typescript// WHAT: Maps shop URLs to controller (public routes, no auth needed)
 // // IMPORTS: shop.controllerr
