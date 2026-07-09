@@ -9,6 +9,8 @@
 
 import { getAllShops,getShopBySlug } from '../controllers/shop.controller'
 
+import { Router } from 'express'
+
 const router = Router()
 
 router.get('/', getAllShops)
