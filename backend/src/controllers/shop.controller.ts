@@ -15,7 +15,10 @@ export const getAllShops = async (req: Request, res: Response) => {
     res.status(500).json(errorResponse('Failed to fetch shops'))
   } }
 
-  export const getShopBySlug = async (req: Request, res: Response) => {
+  export const getShopBySlug = async (
+    req: Request<{slug: string}>,
+    res: Response
+  ) => {
   try {
     const { slug } = req.params
     const shop = await getShopBySlugFromDB(slug)
