@@ -4,16 +4,23 @@
   "description": "Multi-tenant e-commerce for Duhok shops",
   "private": true,
   "scripts": {
-    "dev":           "concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend dev\"",
-    "dev:frontend":  "pnpm --filter frontend dev",
-    "dev:backend":   "pnpm --filter backend dev",
-    "build":         "pnpm --filter frontend build && pnpm --filter backend build",
-    "migrate":       "pnpm --filter database migrate",
-    "migrate:undo":  "pnpm --filter database migrate:undo",
-    "seed":          "pnpm --filter database seed",
-    "seed:undo":     "pnpm --filter database seed:undo"
+    "dev": "concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend dev\"",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "build": "pnpm --filter frontend build && pnpm --filter backend build",
+    "migrate": "pnpm --filter database migrate",
+    "migrate:undo": "pnpm --filter database migrate:undo",
+    "seed": "pnpm --filter database seed",
+    "seed:undo": "pnpm --filter database seed:undo"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "sequelize-cli": "^6.6.5"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "pg": "^8.22.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.8"
   }
 }
