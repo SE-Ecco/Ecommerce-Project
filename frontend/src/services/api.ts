@@ -3,23 +3,44 @@
 // USED BY: authService, productService, orderService, shopService, categoryService, userService
 // KEY: Auto-attaches JWT token to every request. Redirects to /login on 401.
 import axios from 'axios';
+
+import { API_BASE_URL,AUTH_TOKEN_KEY} from '../config/constants';
+/*
+first of all we make the API_BASE_URL in constants.ts
+becouse the name of the file is constants.ts
+and we put some specific values that need to be constant across the whole frontend in one place
+then we import the API_BASE_URL from constants.ts into api.ts
+so that we can use it to set the baseURL for our Axios instance
+*/
+
+
 //base api URL is set to an empty string, which means it will use the current domain as the base URL for API requests. You can change this to your API's base URL if needed.
 const api = axios.create({
-  baseURL: '',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+
 //this function is an Axios request interceptor that automatically attaches a JWT token to the Authorization header of every outgoing request. It retrieves the token from localStorage using the key
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('AUTH_TOKEN_KEY');
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+
+
 //export default api; means that the api instance is being exported as the default export of this module. This allows other parts of the application to import and use this configured Axios instance for making API requests without needing to create a new instance each time.
 export default api;
+
+
+
+
+
 
 // ════════════════════════════════════════════════════
 // 📖 THE STORY OF api.ts
