@@ -110,3 +110,4 @@ module.exports={ //to export the object on the file
     },
 
 };
+//khalil-database-migrations
