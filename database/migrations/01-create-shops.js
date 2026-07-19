@@ -9,9 +9,13 @@
 
 module.exports={ //to export the object on the file
     async up(queryInterface, Sequelize){ //up function to add the table to the database
-        await queryInterface.sequelize.query(
-            `create type tenant_status as enum('active','inactive','suspended')` //create enum
-        );
+        await queryInterface.sequelize.query(`
+            DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tenant_status') THEN
+                    CREATE TYPE tenant_status AS ENUM('active','inactive','suspended');
+                END IF;
+            END $$;
+        `);
         await queryInterface.createTable('tenants',{  //creating table with attributes
               id: {
         type: Sequelize.INTEGER,
@@ -91,13 +95,19 @@ module.exports={ //to export the object on the file
         );
 
         await queryInterface.dropTable('tenants');
+
         await queryInterface.sequelize.query(
-            `drop type if exists tenant_status`
+            `drop type if exists tenant_status cascade`
         );
+
+        await queryInterface.sequelize.query(
+            `drop type if exists "enum_tenants_status" cascade`
+        );
+
         await queryInterface.sequelize.query(
             `drop function if exists updated_timestamp`
         );
     },
 
-    };
-
+};
+//khalil-database-migrations

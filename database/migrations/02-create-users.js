@@ -77,6 +77,16 @@ module.exports = {
     await queryInterface.addIndex('users', ['email'], { name: 'idx_users_email' });
 
     await queryInterface.sequelize.query(`
+      CREATE OR REPLACE FUNCTION update_timestamp()
+      RETURNS TRIGGER AS $$
+      BEGIN
+         NEW.updated_at = NOW();
+         RETURN NEW;
+      END;
+      $$ language 'plpgsql';
+    `);
+
+    await queryInterface.sequelize.query(`
       CREATE TRIGGER set_timestamp
       BEFORE UPDATE ON users
       FOR EACH ROW EXECUTE FUNCTION update_timestamp();
