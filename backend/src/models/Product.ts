@@ -14,86 +14,148 @@
 //   created_at   → TIMESTAMP (auto)
 //   updated_at   → TIMESTAMP (auto)
 
+// WHAT: Sequelize model for "products" table — one row = one product in one shop
+// IMPORTS: sequelize, config/database.ts
+// USED BY: models/index.ts, services/product.service.ts
+// COLUMNS:
+//   id          → SERIAL, Primary Key
+//   tenant_id   → INTEGER, FK → tenants.id
+//   category_id → INTEGER, FK → categories.id (nullable)
+//   name        → VARCHAR, product name
+//   description → TEXT, product description
+//   price       → DECIMAL(10,2), base price in IQD
+//   stock       → INTEGER, available quantity, default 0
+//   is_active   → BOOLEAN, default true (vendor can hide product)
+//   deleted_at  → TIMESTAMP, NULL = exists | timestamp = soft deleted
+//   attributes  → JSONB, flexible extra data (weight, brand, etc.)
+//   created_at  → TIMESTAMP
+//   updated_at  → TIMESTAMP
+// NOTE: NO image_url here! images live in product_images table (1NF fix!)
+
 import { Model, DataTypes } from 'sequelize'; // Model = base class, DataTypes = column types
 import sequelize from '../config/database';    // our database connection instance
 
-// Product class = blueprint of products table
-// each instance = one product row belonging to one shop
+// Product class = blueprint of the products table
+// each instance of Product = one row = one product inside one shop
 class Product extends Model {
-  declare id: number;           // primary key — auto generated
-  declare shop_id: number;      // which shop sells this — REQUIRED 🔒
-  declare category_id: number;  // which category — optional
-  declare name: string;         // product name → "Olive Oil"
-  declare description: string;  // optional product description
-  declare price: number;        // price in IQD → 5000.00
-  declare stock: number;        // how many items available
-  declare image_url: string;    // Cloudinary URL → optional
-  declare is_available: boolean; // true = can buy | false = hidden by owner
+  declare id: number;              // primary key — auto generated
+  declare tenant_id: number;       // which shop owns this product
+  declare category_id: number | null; // which category — optional
+  declare name: string;            // product name → "Olive Oil 1L"
+  declare description: string | null; // optional product description
+  declare price: number;           // base price in IQD → 15000.00
+                                   // ALWAYS use DECIMAL — never FLOAT for money!
+  declare stock: number;           // how many units available right now
+  declare is_active: boolean;      // true = visible | false = hidden by vendor
+  declare deleted_at: Date | null; // soft delete: NULL = exists | date = deleted
+                                   // we never hard delete products (keeps order history!)
+  declare attributes: object | null; // JSONB flexible data
+                                     // food: {"weight": "500g", "expiry": "2025-12"}
+                                     // electronics: {"warranty": "1 year"}
 }
 
+// Product.init() = tell Sequelize exact columns + rules for this table
 Product.init(
   {
     id: {
-      type: DataTypes.INTEGER,  // whole number
-      autoIncrement: true,      // database auto-generates: 1, 2, 3...
-      primaryKey: true,         // unique identifier for each product
+      type: DataTypes.INTEGER,     // whole number
+      primaryKey: true,            // unique identifier for each product
+      autoIncrement: true,         // database auto-generates: 1, 2, 3...
     },
-    shop_id: {
-      type: DataTypes.INTEGER,  // points to shops.id
-      allowNull: false,         // REQUIRED — every product MUST belong to a shop 🔒
-      references: {
-        model: 'shops',         // references shops table
-        key: 'id',              // specifically the id column
-      },
+    tenant_id: {
+      type: DataTypes.INTEGER,     // whole number — references tenants.id
+      allowNull: false,            // required — every product must belong to a shop
     },
     category_id: {
-      type: DataTypes.INTEGER,  // points to categories.id
-      allowNull: true,          // OPTIONAL — product may have no category
-      references: {
-        model: 'categories',    // references categories table
-        key: 'id',              // specifically the id column
-      },
+      type: DataTypes.INTEGER,     // whole number — references categories.id
+      allowNull: true,             // optional — product may not be in any category
     },
     name: {
-      type: DataTypes.STRING,   // text value → "Olive Oil"
-      allowNull: false,         // required — every product must have a name
+      type: DataTypes.STRING,      // text value → "Olive Oil 1L"
+      allowNull: false,            // required — every product must have a name
     },
     description: {
-      type: DataTypes.TEXT,     // longer text (TEXT > STRING for descriptions)
-      allowNull: true,          // optional — product may not have description
+      type: DataTypes.TEXT,        // longer text for detailed product description
+      allowNull: true,             // optional — product may not have description
     },
     price: {
-      type: DataTypes.DECIMAL(10, 2), // up to 10 digits, 2 decimal places
-      // why DECIMAL not INTEGER?     // 5000.50 IQD needs decimals!
-      // DECIMAL(10,2) = max 99999999.99
-      allowNull: false,               // required — every product must have price
+      type: DataTypes.DECIMAL(10, 2), // 10 digits total, 2 after decimal → 99999999.99
+      allowNull: false,            // required — every product must have price
     },
     stock: {
-      type: DataTypes.INTEGER,  // whole number — can't have 0.5 items!
-      allowNull: false,         // required
-      defaultValue: 0,          // new products start with 0 stock
+      type: DataTypes.INTEGER,     // whole number — quantity available
+      allowNull: false,            // required — must track stock
+      defaultValue: 0,             // new products start with 0 stock
     },
-    image_url: {
-      type: DataTypes.STRING,   // Cloudinary URL → "https://res.cloudinary.com/..."
-      allowNull: true,          // optional — product may not have image yet
+    is_active: {
+      type: DataTypes.BOOLEAN,     // true or false only
+      defaultValue: true,          // new products are visible by default ✅
     },
-    is_available: {
-      type: DataTypes.BOOLEAN,  // true or false only
-      allowNull: false,         // required
-      defaultValue: true,       // new products are available by default ✅
-      // shop owner sets to false → hides from customers
-      // different from stock = 0 (manual control vs quantity)
+    deleted_at: {
+      type: DataTypes.DATE,        // timestamp of when product was "deleted"
+      allowNull: true,             // NULL = product exists and is real
+                                   // has value = product was soft deleted
+                                   // ALWAYS filter: WHERE deleted_at IS NULL
+    },
+    attributes: {
+      type: DataTypes.JSONB,       // flexible JSON stored in PostgreSQL
+      allowNull: true,             // optional — not every product has extra attributes
     },
   },
   {
     sequelize,             // which database connection to use
     modelName: 'Product',  // Sequelize internal model name
     tableName: 'products', // exact PostgreSQL table name
-    timestamps: true,      // auto adds created_at + updated_at ✅
+    timestamps: true,      // auto adds created_at + updated_at columns
+    underscored: true,     // converts camelCase to snake_case in DB
   }
 );
 
-export default Product; // exported so models/index.ts + services can import it
+export default Product;
+
+/*
+  HOW THIS FILE CONNECTS:
+  ─────────────────────────────────────────────────────────────────
+
+  DATABASE:
+    Product.init() → Sequelize manages "products" table in PostgreSQL
+    deleted_at = soft delete pattern (product hidden, not destroyed)
+
+  CRITICAL RULE 🚨 — ALWAYS filter soft-deleted products:
+    Product.findAll({ where: { tenant_id, deleted_at: null } }) ✅
+    Product.findAll({ where: { tenant_id } }) ← shows deleted products! ❌
+
+  SERVICE:
+    product.service.ts → Product.findAll({ where: { tenant_id, deleted_at: null } })
+    product.service.ts → Product.create({ tenant_id, name, price, ... })
+    product.service.ts → product.update({ deleted_at: new Date() }) → soft delete
+
+  RELATIONS (defined in models/index.ts):
+    Product belongs to Tenant        (via tenant_id)
+    Product belongs to Category      (via category_id)
+    Product has many ProductImages   (via product_id)
+    Product has many ProductVariants (via product_id)
+    Product has many ProductReviews  (via product_id)
+    Product has many ProductViews    (via product_id)
+    Product has many FlashSales      (via product_id)
+    Product belongs to many Orders   (through order_items)
+    Product belongs to many Tags     (through product_tags)
+
+  WHY NO IMAGE_URL HERE:
+    old design: products.image_url → only 1 image per product ❌
+    new design: product_images table → unlimited images per product ✅
+    this is a normalization fix (1NF — no hidden lists in one column!)
+
+  EXAMPLE:
+  ─────────
+  products table in PostgreSQL:
+  ┌────┬───────────┬──────────────┬───────────┬────────────┐
+  │ id │ tenant_id │ name         │ price     │ deleted_at │
+  ├────┼───────────┼──────────────┼───────────┼────────────┤
+  │ 1  │ 1         │ Olive Oil 1L │ 15000.00  │ NULL       │ ← exists ✅
+  │ 2  │ 1         │ Old Product  │ 5000.00   │ 2026-01-15 │ ← deleted 🗑️
+  └────┴───────────┴──────────────┴───────────┴────────────┘
+*/ // exported so models/index.ts + services can import it
 
 /*
   HOW THIS FILE CONNECTS:

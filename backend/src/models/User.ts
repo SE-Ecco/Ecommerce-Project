@@ -21,64 +21,142 @@
 
 */
 
-import { Model, DataTypes } from 'sequelize'; // Model = base class, DataTypes = column types
-import  sequelize  from '../config/database'; // our database connection instance
+// WHAT: Sequelize model for "users" table — one row = one user (customer, vendor, or admin)
+// IMPORTS: sequelize, config/database.ts
+// USED BY: models/index.ts, services/auth.service.ts, services/user.service.ts
+// COLUMNS:
+//   id                           → SERIAL, Primary Key
+//   tenant_id                    → INTEGER, FK → tenants.id (NULL for admin users!)
+//   name                         → VARCHAR, user full name
+//   email                        → VARCHAR, UNIQUE, login email
+//   password_hash                → TEXT, bcrypt hashed password (NEVER plain text!)
+//   role                         → ENUM('customer','vendor','admin'), default 'customer'
+//   is_active                    → BOOLEAN, default true
+//   cloudinary_avatar_url        → TEXT, Cloudinary profile picture URL
+//   cloudinary_avatar_public_id  → VARCHAR, UNIQUE, for deleting avatar from Cloudinary
+//   created_at                   → TIMESTAMP
+//   updated_at                   → TIMESTAMP
 
-// class declaration — User blueprint extends Sequelize base Model
-// declare = TypeScript only, tells TS what fields exist (no runtime effect)
+import { Model, DataTypes } from 'sequelize'; // Model = base class, DataTypes = column types
+import sequelize from '../config/database';    // our database connection instance
+
+// User class = blueprint of the users table
+// each instance of User = one row = one person using the platform
 class User extends Model {
-  declare id: number;                                        // primary key
-  declare shop_id: number | null;                           // null for super_admin + customers
-  declare full_name: string;                                // user's full name
-  declare email: string;                                    // unique login identifier
-  declare password: string;                                 // bcrypt hash — never plain text!
-  declare phone: string | null;                             // optional contact number
-  declare role: 'super_admin' | 'shop_admin' | 'customer'; // controls access level
+  declare id: number;                              // primary key — auto generated
+  declare tenant_id: number | null;               // which shop this user belongs to
+                                                   // NULL for admin users (they own the platform!)
+  declare name: string;                            // full name → "Ahmed Ali"
+  declare email: string;                           // login email → "ahmed@gmail.com"
+  declare password_hash: string;                   // bcrypt hash → "$2b$10$..."
+                                                   // NEVER store plain password!
+  declare role: 'customer' | 'shop_admin'|'super_admin';  // what this user can do
+  declare is_active: boolean;                      // false = account disabled
+  declare cloudinary_avatar_url: string | null;    // profile picture URL from Cloudinary
+  declare cloudinary_avatar_public_id: string | null; // needed to delete avatar from Cloudinary
 }
 
-// User.init() = tell Sequelize the exact columns + rules for this table
+// User.init() = tell Sequelize exact columns + rules for this table
 User.init(
   {
     id: {
-      type: DataTypes.INTEGER,  // whole number
-      autoIncrement: true,      // database auto-generates: 1, 2, 3...
-      primaryKey: true,         // unique identifier for each row
+      type: DataTypes.INTEGER,   // whole number
+      primaryKey: true,          // unique identifier for each user
+      autoIncrement: true,       // database auto-generates: 1, 2, 3...
     },
-    shop_id: {
-      type: DataTypes.INTEGER,  // points to shops.id (foreign key)
-      allowNull: true,          // NULL for super_admin and customers
+    tenant_id: {
+      type: DataTypes.INTEGER,   // whole number — references tenants.id
+      allowNull: true,           // NULL is allowed → admin users have no shop!
     },
-    full_name: {
-      type: DataTypes.STRING,   // text value
-      allowNull: false,         // required — cannot be empty
+    name: {
+      type: DataTypes.STRING,    // text value → "Ahmed Ali"
+      allowNull: false,          // required — every user must have a name
     },
     email: {
-      type: DataTypes.STRING,   // text value
-      allowNull: false,         // required — cannot be empty
-      unique: true,             // no two users can have same email
+      type: DataTypes.STRING,    // text value → "ahmed@gmail.com"
+      allowNull: false,          // required — needed for login
+      unique: true,              // no two users can share same email on the platform
     },
-    password: {
-      type: DataTypes.STRING,   // stores bcrypt hash (long scrambled string)
-      allowNull: false,         // required — cannot be empty
-    },
-    phone: {
-      type: DataTypes.STRING,   // text (phone numbers can have + and spaces)
-      allowNull: true,          // optional — user may not provide it
+    password_hash: {
+      type: DataTypes.TEXT,      // longer than STRING — bcrypt hashes are ~60 chars
+      allowNull: false,          // required — every user must have password
     },
     role: {
-      type: DataTypes.ENUM('super_admin', 'shop_admin', 'customer'), // fixed choices only
-      allowNull: false,         // required — every user must have a role
-      defaultValue: 'customer', // new users always start as customer — nobody self-promotes!
+      type: DataTypes.ENUM('customer', 'shop_admin', 'super_admin'), // only these 3 values allowed
+      defaultValue: 'customer',  // new users are customers by default ✅
+    },
+    is_active: {
+      type: DataTypes.BOOLEAN,   // true or false only
+      defaultValue: true,        // new users are active by default ✅
+    },
+    cloudinary_avatar_url: {
+      type: DataTypes.TEXT,      // full Cloudinary URL → "https://res.cloudinary.com/..."
+      allowNull: true,           // optional — user may not upload avatar
+    },
+    cloudinary_avatar_public_id: {
+      type: DataTypes.STRING,    // Cloudinary public_id → "duhok/avatars/user_123"
+      allowNull: true,           // optional — only set when avatar uploaded
+      unique: true,              // each uploaded image has unique public_id on Cloudinary
     },
   },
   {
-    sequelize,          // which database connection to use
-    tableName: 'users', // exact PostgreSQL table name
-    timestamps: true,   // auto adds created_at + updated_at columns
+    sequelize,           // which database connection to use
+    modelName: 'User',   // Sequelize internal model name
+    tableName: 'users',  // exact PostgreSQL table name
+    timestamps: true,    // auto adds created_at + updated_at columns
+    underscored: true,   // converts camelCase to snake_case in DB
   }
 );
 
-export default User; // exported so auth.service.ts + models/index.ts can import it
+export default User;
+
+/*
+  HOW THIS FILE CONNECTS:
+  ─────────────────────────────────────────────────────────────────
+
+  DATABASE:
+    User.init() → Sequelize manages "users" table in PostgreSQL
+    email unique → no duplicate accounts on platform
+    tenant_id nullable → admins don't belong to any shop
+
+  SECURITY RULE 🚨:
+    tenant_id must ALWAYS come from the verified JWT token
+    NEVER from req.body — hacker could fake it!
+    backend middleware extracts tenant_id from token → passes to service
+
+  SERVICE:
+    auth.service.ts → User.findOne({ where: { email } }) → login lookup
+    auth.service.ts → User.create({ ... }) → register new user
+    auth.service.ts → bcrypt.compare(password, user.password_hash) → verify password
+
+  RELATIONS (defined in models/index.ts):
+    User belongs to Tenant    (via tenant_id)
+    User has many Orders      (via user_id)
+    User has many Addresses   (via user_id)
+    User has many CartItems   (via user_id)
+    User has many Wishlists   (via user_id)
+    User has many Reviews     (via user_id)
+    User has many Notifications (via user_id)
+
+  ROLES EXPLAINED:
+    customer → browses shops, adds to cart, places orders
+    vendor   → owns a shop, manages products and orders
+    admin    → super admin, manages entire platform
+
+  EXAMPLE:
+  ─────────
+  users table in PostgreSQL:
+  ┌────┬───────────┬────────────────┬───────────────────┬──────────┐
+  │ id │ tenant_id │ name           │ email             │ role     │
+  ├────┼───────────┼────────────────┼───────────────────┼──────────┤
+  │ 1  │ 1         │ Ahmed Ali      │ ahmed@gmail.com   │ vendor   │
+  │ 2  │ 1         │ Khalil Test    │ khalil@gmail.com  │ customer │
+  │ 3  │ NULL      │ Super Admin    │ admin@platform.com│ admin    │
+  └────┴───────────┴────────────────┴───────────────────┴──────────┘
+
+  User.findOne({ where: { email: "ahmed@gmail.com" } }) → returns row 1 ✅
+  admin has tenant_id = NULL → belongs to nobody → manages everyone ✅
+*/ // exported so auth.service.ts + models/index.ts can import it
 
 /*
   HOW THIS FILE CONNECTS TO THE REST OF THE PROJECT:

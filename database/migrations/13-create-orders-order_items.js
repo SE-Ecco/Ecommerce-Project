@@ -38,13 +38,7 @@ module.exports = {
         allowNull: true,
         references: { model: 'addresses', key: 'id' },
         onDelete: 'SET NULL',
-      },
-      coupon_id: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        references: { model: 'coupons', key: 'id' },
-        onDelete: 'SET NULL', //
-      },
+      }, 
       status: {
         type: Sequelize.ENUM('pending','confirmed','processing','shipped','delivered','cancelled'),
         allowNull: false,
