@@ -14,10 +14,10 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
-      tenant_id: {
+      shop_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'tenants', key: 'id' },
+        references: { model: 'shops', key: 'id' },
         onDelete: 'CASCADE',
       },
       category_id: {
@@ -67,7 +67,7 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex('products', ['tenant_id'], { name: 'idx_products_tenant_id' });
+    await queryInterface.addIndex('products', ['shop_id'], { name: 'idx_products_shop_id' });
     await queryInterface.addIndex('products', ['category_id'], { name: 'idx_products_category_id' });
     await queryInterface.addIndex('products', ['deleted_at'], { name: 'idx_products_deleted_at' });
 

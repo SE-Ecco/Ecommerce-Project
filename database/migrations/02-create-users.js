@@ -19,10 +19,10 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
-      tenant_id: {
+      shop_id: {
         type: Sequelize.INTEGER,
         allowNull: true,  // NULL for admin users (they belong to no shop)
-        references: { model: 'tenants', key: 'id' },
+        references: { model: 'shops', key: 'id' },
         onDelete: 'CASCADE', // if we delete any shop  the users of this shop will be deleted
       },
       name: {
@@ -73,7 +73,7 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex('users', ['tenant_id'], { name: 'idx_users_tenant_id' });
+    await queryInterface.addIndex('users', ['shop_id'], { name: 'idx_users_shop_id' });
     await queryInterface.addIndex('users', ['email'], { name: 'idx_users_email' });
 
     await queryInterface.sequelize.query(`

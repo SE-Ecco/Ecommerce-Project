@@ -20,10 +20,10 @@ module.exports = {
         references: { model: 'orders', key: 'id' },
         onDelete: 'CASCADE',
       },
-      tenant_id: {
+      shop_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'tenants', key: 'id' },
+        references: { model: 'shops', key: 'id' },
         onDelete: 'CASCADE',
       },
       amount: {
@@ -57,7 +57,7 @@ module.exports = {
     });
 
     await queryInterface.addIndex('payment_transactions', ['order_id'], { name: 'idx_payment_order_id' });
-    await queryInterface.addIndex('payment_transactions', ['tenant_id'], { name: 'idx_payment_tenant_id' });
+    await queryInterface.addIndex('payment_transactions', ['shop_id'], { name: 'idx_payment_shop_id' });
 
     await queryInterface.sequelize.query(`
       CREATE TRIGGER set_timestamp

@@ -10,10 +10,10 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
-      tenant_id: {
+      shop_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'tenants', key: 'id' },
+        references: { model: 'shops', key: 'id' },
         onDelete: 'CASCADE',
       },
       name: {
@@ -29,7 +29,7 @@ module.exports = {
 
     // no duplicate tag names per shop
     await queryInterface.sequelize.query(`
-      ALTER TABLE tags ADD CONSTRAINT unique_tag_per_tenant UNIQUE (tenant_id, name)
+      ALTER TABLE tags ADD CONSTRAINT unique_tag_per_shop UNIQUE (shop_id, name)
     `);
 
     await queryInterface.createTable('product_tags', {
@@ -58,7 +58,7 @@ module.exports = {
       ALTER TABLE product_tags ADD CONSTRAINT unique_product_tag UNIQUE (product_id, tag_id)
     `);
 
-    await queryInterface.addIndex('tags', ['tenant_id'], { name: 'idx_tags_tenant_id' });
+    await queryInterface.addIndex('tags', ['shop_id'], { name: 'idx_tags_shop_id' });
     await queryInterface.addIndex('product_tags', ['product_id'], { name: 'idx_product_tags_product_id' });
     await queryInterface.addIndex('product_tags', ['tag_id'], { name: 'idx_product_tags_tag_id' });
   },

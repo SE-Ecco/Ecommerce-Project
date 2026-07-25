@@ -16,10 +16,10 @@ module.exports = {
         references: { model: 'users', key: 'id' },
         onDelete: 'CASCADE',
       },
-      tenant_id: {
+      shop_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'tenants', key: 'id' },
+        references: { model: 'shops', key: 'id' },
         onDelete: 'CASCADE',
       },
       name: {
@@ -67,7 +67,7 @@ module.exports = {
     `);
 
     await queryInterface.addIndex('wishlists', ['user_id'], { name: 'idx_wishlists_user_id' });
-    await queryInterface.addIndex('wishlists', ['tenant_id'], { name: 'idx_wishlists_tenant_id' });
+    await queryInterface.addIndex('wishlists', ['shop_id'], { name: 'idx_wishlists_shop_id' });
     await queryInterface.addIndex('wishlist_items', ['wishlist_id'], { name: 'idx_wishlist_items_wishlist_id' });
   },
 

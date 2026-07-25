@@ -21,10 +21,10 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
-      tenant_id: {
+      shop_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'tenants', key: 'id' },
+        references: { model: 'shops', key: 'id' },
         onDelete: 'CASCADE',
       },
       user_id: {
@@ -110,14 +110,9 @@ module.exports = {
       },
     });
 
-    // add FK from coupon_usages.order_id now that orders exists
-    await queryInterface.sequelize.query(`
-      ALTER TABLE coupon_usages
-      ADD CONSTRAINT fk_coupon_usages_order
-      FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
-    `);
+   
 
-    await queryInterface.addIndex('orders', ['tenant_id'], { name: 'idx_orders_tenant_id' });
+    await queryInterface.addIndex('orders', ['shop_id'], { name: 'idx_orders_shop_id' });
     await queryInterface.addIndex('orders', ['user_id'], { name: 'idx_orders_user_id' });
     await queryInterface.addIndex('orders', ['status'], { name: 'idx_orders_status' });
     await queryInterface.addIndex('order_items', ['order_id'], { name: 'idx_order_items_order_id' });
