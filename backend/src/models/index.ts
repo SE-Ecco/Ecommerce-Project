@@ -22,16 +22,16 @@
 // IMPORTS: all model files
 // USED BY: config/database.ts (loaded at server startup)
 //
-// RULE 🚨: tenant_id must ALWAYS come from JWT token — NEVER from req.body!
-//          this is enforced in middleware, but every query here filters by tenant_id
+// RULE 🚨: shop_id must ALWAYS come from JWT token — NEVER from req.body!
+//          this is enforced in middleware, but every query here filters by shop_id
 //
 // HOW TO READ ASSOCIATIONS:
-//   hasMany    → "I own many of these"      → Tenant.hasMany(Product) = one shop, many products
-//   belongsTo  → "I belong to one of these" → Product.belongsTo(Tenant) = product belongs to shop
+//   hasMany    → "I own many of these"      → shop.hasMany(Product) = one shop, many products
+//   belongsTo  → "I belong to one of these" → Product.belongsTo(shop) = product belongs to shop
 //   belongsToMany → "many-to-many via bridge table"
 //
 // TABLES IN THIS PROJECT (22 tables):
-//   Core:        tenants, users, categories, products
+//   Core:        shops, users, categories, products
 //   Product:     product_images, product_variants, product_reviews, product_views, tags, product_tags
 //   Shopping:    cart_items, wishlists, wishlist_items, addresses
 //   Orders:      orders, order_items, payment_transactions
@@ -43,7 +43,7 @@
 // REMOVED TABLES (not in this project):
 //   ❌ coupons, coupon_usages, loyalty_points → removed from project scope
 
-import Tenant           from './Shop';
+import shop           from './Shop';
 import User             from './User';
 import Category         from './Category';
 import Product          from './Product';
@@ -64,75 +64,76 @@ import Notification     from './Notification';
 import SearchLog        from './Searchlog'; // created by team member ✅
 
 // ─────────────────────────────────────────────────────────────
-// TENANT associations
-// tenants = the CENTER of everything in multi-tenant system
-// almost every table has tenant_id pointing back here
+// shop associations
+// shops = the CENTER of everything in multi-shop system
+// almost every table has shop_id pointing back here
 // ─────────────────────────────────────────────────────────────
-Tenant.hasOne(ShopSettings, {
-  foreignKey: 'tenant_id',
-  as: 'settings',               // Tenant.findOne({ include: [{ model: ShopSettings, as: 'settings' }] })
+shop.hasOne(ShopSettings, {
+  foreignKey: 'shop_id',
+  as: 'settings',               // shop.findOne({ include: [{ model: ShopSettings, as: 'settings' }] })
 });
-Tenant.hasMany(User, {
-  foreignKey: 'tenant_id',
+shop.hasMany(User, {
+  foreignKey: 'shop_id',
   as: 'users',
 });
-Tenant.hasMany(Category, {
-  foreignKey: 'tenant_id',
+shop.hasMany(Category, {
+  foreignKey: 'shop_id',
   as: 'categories',
 });
-Tenant.hasMany(Product, {
-  foreignKey: 'tenant_id',
+shop.hasMany(Product, {
+  foreignKey: 'shop_id',
   as: 'products',
 });
-Tenant.hasMany(Order, {
-  foreignKey: 'tenant_id',
+shop.hasMany(Order, {
+  foreignKey: 'shop_id',
   as: 'orders',
 });
-Tenant.hasMany(FlashSale, {
-  foreignKey: 'tenant_id',
+shop.hasMany(FlashSale, {
+  foreignKey: 'shop_id',
   as: 'flash_sales',
 });
-Tenant.hasMany(ShippingMethod, {
-  foreignKey: 'tenant_id',
+shop.hasMany(ShippingMethod, {
+  foreignKey: 'shop_id',
   as: 'shipping_methods',
 });
-Tenant.hasMany(Tag, {
-  foreignKey: 'tenant_id',
+shop.hasMany(Tag, {
+  foreignKey: 'shop_id',
   as: 'tags',
 });
-Tenant.hasMany(SearchLog, {
-  foreignKey: 'tenant_id',
+shop.hasMany(SearchLog, {
+  foreignKey: 'shop_id',
   as: 'search_logs',
 });
-Tenant.hasMany(Notification, {
-  foreignKey: 'tenant_id',
+shop.hasMany(Notification, {
+  foreignKey: 'shop_id',
   as: 'notifications',
 });
-Tenant.hasMany(ProductReview, {
-  foreignKey: 'tenant_id',
+shop.hasMany(ProductReview, {
+  foreignKey: 'shop_id',
   as: 'reviews',
 });
-Tenant.hasMany(ProductView, {
-  foreignKey: 'tenant_id',
+shop.hasMany(ProductView, {
+  foreignKey: 'shop_id',
   as: 'product_views',
 });
-Tenant.hasMany(CartItem, {
-  foreignKey: 'tenant_id',
+shop.hasMany(CartItem, {
+  foreignKey: 'shop_id',
   as: 'cart_items',
 });
-Tenant.hasMany(Wishlist, {
-  foreignKey: 'tenant_id',
+shop.hasMany(Wishlist, {
+  foreignKey: 'shop_id',
   as: 'wishlists',
 });
+shop.hasMany(Address, { foreignKey: 'shop_id', as: 'addresses' });
 
 // ─────────────────────────────────────────────────────────────
 // USER associations
 // users can be customers, vendors, or admins
-// admin users have tenant_id = NULL (they belong to no shop)
+// admin users have shop_id = NULL (they belong to no shop)
 // ─────────────────────────────────────────────────────────────
-User.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+User.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 User.hasMany(Order, {
   foreignKey: 'user_id',
@@ -173,9 +174,9 @@ User.hasMany(SearchLog, {
 // parent_id = NULL means top-level category
 // parent_id = 3 means this is a subcategory of category 3
 // ─────────────────────────────────────────────────────────────
-Category.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+Category.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 Category.hasMany(Product, {
   foreignKey: 'category_id',
@@ -195,9 +196,9 @@ Category.belongsTo(Category, {
 // products are the core entity customers browse and buy
 // no image_url on products → images live in product_images (1NF!)
 // ─────────────────────────────────────────────────────────────
-Product.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+Product.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 Product.belongsTo(Category, {
   foreignKey: 'category_id',
@@ -283,9 +284,9 @@ ProductReview.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
 });
-ProductReview.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+ProductReview.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -296,9 +297,9 @@ ProductView.belongsTo(Product, {
   foreignKey: 'product_id',
   as: 'product',
 });
-ProductView.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+ProductView.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 ProductView.belongsTo(User, {
   foreignKey: 'user_id',
@@ -310,9 +311,9 @@ ProductView.belongsTo(User, {
 // tags are searchable labels per shop
 // product ↔ tags = many-to-many via product_tags bridge table
 // ─────────────────────────────────────────────────────────────
-Tag.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+Tag.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 Tag.belongsToMany(Product, {
   through: ProductTag,            // bridge table
@@ -329,9 +330,9 @@ CartItem.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
 });
-CartItem.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+CartItem.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 CartItem.belongsTo(Product, {
   foreignKey: 'product_id',
@@ -351,9 +352,9 @@ Wishlist.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
 });
-Wishlist.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+Wishlist.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 Wishlist.hasMany(WishlistItem, {
   foreignKey: 'wishlist_id',
@@ -384,9 +385,9 @@ Address.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
 });
-Address.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+Address.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 Address.hasMany(Order, {
   foreignKey: 'address_id',
@@ -399,9 +400,9 @@ Address.hasMany(Order, {
 // unit_price in order_items = price SNAPSHOT at purchase time 📸
 // never reference products.price for order history!
 // ─────────────────────────────────────────────────────────────
-Order.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+Order.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 Order.belongsTo(User, {
   foreignKey: 'user_id',
@@ -452,9 +453,9 @@ PaymentTransaction.belongsTo(Order, {
   foreignKey: 'order_id',
   as: 'order',
 });
-PaymentTransaction.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+PaymentTransaction.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -462,9 +463,9 @@ PaymentTransaction.belongsTo(Tenant, {
 // limited time discounts on specific products
 // DB has CHECK: ends_at > starts_at + discount_pct between 1-100
 // ─────────────────────────────────────────────────────────────
-FlashSale.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+FlashSale.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 FlashSale.belongsTo(Product, {
   foreignKey: 'product_id',
@@ -473,20 +474,20 @@ FlashSale.belongsTo(Product, {
 
 // ─────────────────────────────────────────────────────────────
 // SHOP SETTINGS associations
-// one-to-one: ONE settings row per shop (UNIQUE on tenant_id in DB)
+// one-to-one: ONE settings row per shop (UNIQUE on shop_id in DB)
 // ─────────────────────────────────────────────────────────────
-ShopSettings.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+ShopSettings.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 
 // ─────────────────────────────────────────────────────────────
 // SHIPPING METHOD associations
 // each shop defines their own delivery options
 // ─────────────────────────────────────────────────────────────
-ShippingMethod.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+ShippingMethod.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -497,9 +498,9 @@ Notification.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
 });
-Notification.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+Notification.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -507,9 +508,9 @@ Notification.belongsTo(Tenant, {
 // tracks what customers search for (business intelligence!)
 // user_id is nullable → guest searches also counted
 // ─────────────────────────────────────────────────────────────
-SearchLog.belongsTo(Tenant, {
-  foreignKey: 'tenant_id',
-  as: 'tenant',
+SearchLog.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
 });
 SearchLog.belongsTo(User, {
   foreignKey: 'user_id',
@@ -522,7 +523,7 @@ SearchLog.belongsTo(User, {
 // import { Product, ProductImage, Order, OrderItem } from '../models';
 // ─────────────────────────────────────────────────────────────
 export {
-  Tenant,
+  shop,
   User,
   Category,
   Product,

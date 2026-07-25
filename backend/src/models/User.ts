@@ -26,7 +26,7 @@
 // USED BY: models/index.ts, services/auth.service.ts, services/user.service.ts
 // COLUMNS:
 //   id                           → SERIAL, Primary Key
-//   tenant_id                    → INTEGER, FK → tenants.id (NULL for admin users!)
+//   shop_id                    → INTEGER, FK → shops.id (NULL for admin users!)
 //   name                         → VARCHAR, user full name
 //   email                        → VARCHAR, UNIQUE, login email
 //   password_hash                → TEXT, bcrypt hashed password (NEVER plain text!)
@@ -44,7 +44,7 @@ import sequelize from '../config/database';    // our database connection instan
 // each instance of User = one row = one person using the platform
 class User extends Model {
   declare id: number;                              // primary key — auto generated
-  declare tenant_id: number | null;               // which shop this user belongs to
+  declare shop_id: number | null;               // which shop this user belongs to
                                                    // NULL for admin users (they own the platform!)
   declare name: string;                            // full name → "Ahmed Ali"
   declare email: string;                           // login email → "ahmed@gmail.com"
@@ -64,8 +64,8 @@ User.init(
       primaryKey: true,          // unique identifier for each user
       autoIncrement: true,       // database auto-generates: 1, 2, 3...
     },
-    tenant_id: {
-      type: DataTypes.INTEGER,   // whole number — references tenants.id
+    shop_id: {
+      type: DataTypes.INTEGER,   // whole number — references shops.id
       allowNull: true,           // NULL is allowed → admin users have no shop!
     },
     name: {
@@ -117,12 +117,12 @@ export default User;
   DATABASE:
     User.init() → Sequelize manages "users" table in PostgreSQL
     email unique → no duplicate accounts on platform
-    tenant_id nullable → admins don't belong to any shop
+    shop_id nullable → admins don't belong to any shop
 
   SECURITY RULE 🚨:
-    tenant_id must ALWAYS come from the verified JWT token
+    shop_id must ALWAYS come from the verified JWT token
     NEVER from req.body — hacker could fake it!
-    backend middleware extracts tenant_id from token → passes to service
+    backend middleware extracts shop_id from token → passes to service
 
   SERVICE:
     auth.service.ts → User.findOne({ where: { email } }) → login lookup
@@ -130,7 +130,7 @@ export default User;
     auth.service.ts → bcrypt.compare(password, user.password_hash) → verify password
 
   RELATIONS (defined in models/index.ts):
-    User belongs to Tenant    (via tenant_id)
+    User belongs to shop    (via shop_id)
     User has many Orders      (via user_id)
     User has many Addresses   (via user_id)
     User has many CartItems   (via user_id)
@@ -147,7 +147,7 @@ export default User;
   ─────────
   users table in PostgreSQL:
   ┌────┬───────────┬────────────────┬───────────────────┬──────────┐
-  │ id │ tenant_id │ name           │ email             │ role     │
+  │ id │ shop_id │ name           │ email             │ role     │
   ├────┼───────────┼────────────────┼───────────────────┼──────────┤
   │ 1  │ 1         │ Ahmed Ali      │ ahmed@gmail.com   │ vendor   │
   │ 2  │ 1         │ Khalil Test    │ khalil@gmail.com  │ customer │
@@ -155,7 +155,7 @@ export default User;
   └────┴───────────┴────────────────┴───────────────────┴──────────┘
 
   User.findOne({ where: { email: "ahmed@gmail.com" } }) → returns row 1 ✅
-  admin has tenant_id = NULL → belongs to nobody → manages everyone ✅
+  admin has shop_id = NULL → belongs to nobody → manages everyone ✅
 */ // exported so auth.service.ts + models/index.ts can import it
 
 /*

@@ -5,7 +5,7 @@
 //   id                          → SERIAL, Primary Key
 //   product_id                  → INTEGER, FK → products.id
 //   user_id                     → INTEGER, FK → users.id
-//   tenant_id                   → INTEGER, FK → tenants.id
+//   shop_id                   → INTEGER, FK → shops.id
 //   rating                      → INTEGER, 1-5 stars (CHECK constraint in DB)
 //   comment                     → TEXT, optional written review
 //   cloudinary_photo_url        → TEXT, optional photo attached to review
@@ -23,7 +23,7 @@ class ProductReview extends Model {
   declare id: number;                            // primary key — auto generated
   declare product_id: number;                    // which product is being reviewed
   declare user_id: number;                       // which customer left this review
-  declare tenant_id: number;                     // which shop this review belongs to
+  declare shop_id: number;                     // which shop this review belongs to
   declare rating: number;                        // star rating → 1, 2, 3, 4, or 5
                                                  // DB has CHECK constraint: rating >= 1 AND rating <= 5
   declare comment: string | null;                // optional written review text
@@ -47,9 +47,9 @@ ProductReview.init(
       type: DataTypes.INTEGER,   // whole number — references users.id
       allowNull: false,          // required — review must have an author
     },
-    tenant_id: {
-      type: DataTypes.INTEGER,   // whole number — references tenants.id
-      allowNull: false,          // required — needed for multi-tenant filtering
+    shop_id: {
+      type: DataTypes.INTEGER,   // whole number — references shops.id
+      allowNull: false,          // required — needed for multi-shop filtering
     },
     rating: {
       type: DataTypes.INTEGER,   // whole number: 1, 2, 3, 4, or 5
@@ -94,14 +94,14 @@ export default ProductReview;
     CHECK(rating >= 1 AND rating <= 5) → in migration → DB rejects bad ratings
 
   SERVICE:
-    review.service.ts → ProductReview.findAll({ where: { product_id, tenant_id } })
+    review.service.ts → ProductReview.findAll({ where: { product_id, shop_id } })
     review.service.ts → ProductReview.findOne({ where: { product_id, user_id } }) → check if reviewed
     review.service.ts → ProductReview.create({ product_id, user_id, rating, ... })
 
   RELATIONS (defined in models/index.ts):
     ProductReview belongs to Product (via product_id)
     ProductReview belongs to User    (via user_id)
-    ProductReview belongs to Tenant  (via tenant_id)
+    ProductReview belongs to shop  (via shop_id)
 
   EXAMPLE:
   ─────────

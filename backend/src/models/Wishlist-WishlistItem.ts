@@ -6,7 +6,7 @@
 // WISHLIST COLUMNS:
 //   id         → SERIAL, Primary Key
 //   user_id    → INTEGER, FK → users.id
-//   tenant_id  → INTEGER, FK → tenants.id
+//   shop_id  → INTEGER, FK → shops.id
 //   name       → VARCHAR, wishlist name, default 'My Wishlist'
 //   created_at → TIMESTAMP
 // WISHLIST_ITEM COLUMNS:
@@ -25,7 +25,7 @@ import sequelize from '../config/database';
 export class Wishlist extends Model {
   declare id: number;
   declare user_id: number;    // which user created this wishlist
-  declare tenant_id: number;  // which shop this wishlist belongs to
+  declare shop_id: number;  // which shop this wishlist belongs to
   declare name: string;       // wishlist name → "Birthday gifts", "My Wishlist"
   declare created_at: Date;
 }
@@ -34,7 +34,7 @@ Wishlist.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
     user_id: { type: DataTypes.INTEGER, allowNull: false },
-    tenant_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     name: {
       type: DataTypes.STRING,
       allowNull: false,

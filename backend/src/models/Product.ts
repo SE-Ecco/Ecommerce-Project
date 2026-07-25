@@ -19,7 +19,7 @@
 // USED BY: models/index.ts, services/product.service.ts
 // COLUMNS:
 //   id          → SERIAL, Primary Key
-//   tenant_id   → INTEGER, FK → tenants.id
+//   shop_id   → INTEGER, FK → shops.id
 //   category_id → INTEGER, FK → categories.id (nullable)
 //   name        → VARCHAR, product name
 //   description → TEXT, product description
@@ -39,7 +39,7 @@ import sequelize from '../config/database';    // our database connection instan
 // each instance of Product = one row = one product inside one shop
 class Product extends Model {
   declare id: number;              // primary key — auto generated
-  declare tenant_id: number;       // which shop owns this product
+  declare shop_id: number;       // which shop owns this product
   declare category_id: number | null; // which category — optional
   declare name: string;            // product name → "Olive Oil 1L"
   declare description: string | null; // optional product description
@@ -62,8 +62,8 @@ Product.init(
       primaryKey: true,            // unique identifier for each product
       autoIncrement: true,         // database auto-generates: 1, 2, 3...
     },
-    tenant_id: {
-      type: DataTypes.INTEGER,     // whole number — references tenants.id
+    shop_id: {
+      type: DataTypes.INTEGER,     // whole number — references shops.id
       allowNull: false,            // required — every product must belong to a shop
     },
     category_id: {
@@ -122,16 +122,16 @@ export default Product;
     deleted_at = soft delete pattern (product hidden, not destroyed)
 
   CRITICAL RULE 🚨 — ALWAYS filter soft-deleted products:
-    Product.findAll({ where: { tenant_id, deleted_at: null } }) ✅
-    Product.findAll({ where: { tenant_id } }) ← shows deleted products! ❌
+    Product.findAll({ where: { shop_id, deleted_at: null } }) ✅
+    Product.findAll({ where: { shop_id } }) ← shows deleted products! ❌
 
   SERVICE:
-    product.service.ts → Product.findAll({ where: { tenant_id, deleted_at: null } })
-    product.service.ts → Product.create({ tenant_id, name, price, ... })
+    product.service.ts → Product.findAll({ where: { shop_id, deleted_at: null } })
+    product.service.ts → Product.create({ shop_id, name, price, ... })
     product.service.ts → product.update({ deleted_at: new Date() }) → soft delete
 
   RELATIONS (defined in models/index.ts):
-    Product belongs to Tenant        (via tenant_id)
+    Product belongs to shop        (via shop_id)
     Product belongs to Category      (via category_id)
     Product has many ProductImages   (via product_id)
     Product has many ProductVariants (via product_id)
@@ -150,7 +150,7 @@ export default Product;
   ─────────
   products table in PostgreSQL:
   ┌────┬───────────┬──────────────┬───────────┬────────────┐
-  │ id │ tenant_id │ name         │ price     │ deleted_at │
+  │ id │ shop_id │ name         │ price     │ deleted_at │
   ├────┼───────────┼──────────────┼───────────┼────────────┤
   │ 1  │ 1         │ Olive Oil 1L │ 15000.00  │ NULL       │ ← exists ✅
   │ 2  │ 1         │ Old Product  │ 5000.00   │ 2026-01-15 │ ← deleted 🗑️

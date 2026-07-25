@@ -3,7 +3,7 @@
 // USED BY: models/index.ts, services/shipping.service.ts
 // COLUMNS:
 //   id        → SERIAL, Primary Key
-//   tenant_id → INTEGER, FK → tenants.id
+//   shop_id → INTEGER, FK → shops.id
 //   name      → VARCHAR, delivery option label
 //   price     → DECIMAL(10,2), delivery cost (0 = free!)
 //   min_days  → INTEGER, minimum estimated delivery days (nullable)
@@ -18,7 +18,7 @@ import sequelize from '../config/database';
 // each instance = one delivery option offered by one shop
 class ShippingMethod extends Model {
   declare id: number;
-  declare tenant_id: number;        // which shop offers this shipping option
+  declare shop_id: number;        // which shop offers this shipping option
   declare name: string;             // option name → "Standard Delivery", "Express", "Free"
   declare price: number;            // cost in IQD → 2000.00 | 0.00 = free shipping!
   declare min_days: number | null;  // minimum days → 1 (best case)
@@ -31,7 +31,7 @@ class ShippingMethod extends Model {
 ShippingMethod.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
-    tenant_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     name: {
       type: DataTypes.STRING,
       allowNull: false,

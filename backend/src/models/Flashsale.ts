@@ -3,7 +3,7 @@
 // USED BY: models/index.ts, services/flashsale.service.ts
 // COLUMNS:
 //   id           → SERIAL, Primary Key
-//   tenant_id    → INTEGER, FK → tenants.id
+//   shop_id    → INTEGER, FK → shops.id
 //   product_id   → INTEGER, FK → products.id
 //   discount_pct → INTEGER, discount percentage (1-100)
 //   starts_at    → TIMESTAMP, when sale begins
@@ -20,7 +20,7 @@ import sequelize from '../config/database';
 // each instance = one time-limited discount on one product
 class FlashSale extends Model {
   declare id: number;
-  declare tenant_id: number;    // which shop created this flash sale
+  declare shop_id: number;    // which shop created this flash sale
   declare product_id: number;   // which product is on sale
   declare discount_pct: number; // percentage discount → 20 means 20% off
   declare starts_at: Date;      // when sale starts → "2026-07-04 10:00:00"
@@ -33,7 +33,7 @@ class FlashSale extends Model {
 FlashSale.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
-    tenant_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     product_id: { type: DataTypes.INTEGER, allowNull: false },
     discount_pct: {
       type: DataTypes.INTEGER,
