@@ -4,7 +4,7 @@
 // COLUMNS:
 //   id              → SERIAL, Primary Key
 //   order_id        → INTEGER, FK → orders.id
-//   tenant_id       → INTEGER, FK → tenants.id
+//   shop_id       → INTEGER, FK → shops.id
 //   amount          → DECIMAL(10,2), how much was charged
 //   status          → ENUM('pending','completed','failed','refunded')
 //   payment_method  → VARCHAR, how customer paid
@@ -21,7 +21,7 @@ import sequelize from '../config/database';
 class PaymentTransaction extends Model {
   declare id: number;
   declare order_id: number;              // which order this payment is for
-  declare tenant_id: number;             // which shop received this payment
+  declare shop_id: number;             // which shop received this payment
   declare amount: number;                // how much was charged in this attempt
   declare status: 'pending' | 'completed' | 'failed' | 'refunded';
   declare payment_method: string | null; // how customer paid:
@@ -36,7 +36,7 @@ PaymentTransaction.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
     order_id: { type: DataTypes.INTEGER, allowNull: false },
-    tenant_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     amount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,

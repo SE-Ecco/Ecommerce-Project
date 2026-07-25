@@ -3,7 +3,7 @@
 // USED BY: models/index.ts, services/search.service.ts
 // COLUMNS:
 //   id            → SERIAL, Primary Key
-//   tenant_id     → INTEGER, FK → tenants.id
+//   shop_id     → INTEGER, FK → shops.id
 //   user_id       → INTEGER, FK → users.id (NULL = guest search!)
 //   query         → VARCHAR, what the customer searched for
 //   results_count → INTEGER, how many products matched the search
@@ -22,7 +22,7 @@ import sequelize from '../config/database';    // our database connection instan
 // each instance = one search made by one user (or guest) inside one shop
 class SearchLog extends Model {
   declare id: number;
-  declare tenant_id: number;        // which shop was being searched
+  declare shop_id: number;        // which shop was being searched
   declare user_id: number | null;   // who searched — NULL if guest (not logged in)
                                     // we still log guest searches for analytics!
   declare query: string;            // what they typed → "olive oil", "iphone", "laptop"
@@ -40,8 +40,8 @@ SearchLog.init(
       primaryKey: true,          // unique identifier for each search log
       autoIncrement: true,       // database auto-generates: 1, 2, 3...
     },
-    tenant_id: {
-      type: DataTypes.INTEGER,   // whole number — references tenants.id
+    shop_id: {
+      type: DataTypes.INTEGER,   // whole number — references shops.id
       allowNull: false,          // required — must know which shop was searched
     },
     user_id: {
@@ -77,15 +77,15 @@ export default SearchLog;
   DATABASE:
     SearchLog.init() → Sequelize manages "search_logs" table in PostgreSQL
     idx_search_logs_query → index on query column for fast analytics lookups
-    idx_search_logs_tenant_id → index for filtering by shop
+    idx_search_logs_shop_id → index for filtering by shop
 
   SERVICE:
-    search.service.ts → SearchLog.create({ tenant_id, user_id, query, results_count })
-    search.service.ts → SearchLog.findAll({ where: { tenant_id, results_count: 0 } })
+    search.service.ts → SearchLog.create({ shop_id, user_id, query, results_count })
+    search.service.ts → SearchLog.findAll({ where: { shop_id, results_count: 0 } })
                         → shows vendor what products are MISSING from their shop!
 
   RELATIONS (defined in models/index.ts):
-    SearchLog belongs to Tenant (via tenant_id)
+    SearchLog belongs to shop (via shop_id)
     SearchLog belongs to User   (via user_id) ← nullable! guests have no user_id
 
   HOW TO USE IN SEARCH FLOW:
@@ -93,7 +93,7 @@ export default SearchLog;
     gets results → THEN logs the search:
 
     await SearchLog.create({
-      tenant_id: req.user.tenant_id,  // from JWT — never from req.body!
+      shop_id: req.user.shop_id,  // from JWT — never from req.body!
       user_id: req.user?.id || null,  // null if guest
       query: 'iphone',
       results_count: products.length, // how many matched
@@ -102,19 +102,19 @@ export default SearchLog;
   ANALYTICS QUERIES VENDORS CAN RUN:
     top 10 most searched terms:
     SELECT query, COUNT(*) as searches
-    FROM search_logs WHERE tenant_id = 1
+    FROM search_logs WHERE shop_id = 1
     GROUP BY query ORDER BY searches DESC LIMIT 10;
 
     searches with zero results (missing products!):
     SELECT query, COUNT(*) as times
-    FROM search_logs WHERE tenant_id = 1 AND results_count = 0
+    FROM search_logs WHERE shop_id = 1 AND results_count = 0
     GROUP BY query ORDER BY times DESC;
 
   EXAMPLE:
   ─────────
   search_logs table in PostgreSQL:
   ┌────┬───────────┬─────────┬──────────────┬───────────────┐
-  │ id │ tenant_id │ user_id │ query        │ results_count │
+  │ id │ shop_id │ user_id │ query        │ results_count │
   ├────┼───────────┼─────────┼──────────────┼───────────────┤
   │ 1  │ 1         │ 2       │ olive oil    │ 3             │ ← found results ✅
   │ 2  │ 1         │ NULL    │ fresh bread  │ 1             │ ← guest search ✅

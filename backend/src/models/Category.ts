@@ -12,7 +12,7 @@
 // USED BY: models/index.ts, services/category.service.ts
 // COLUMNS:
 //   id                          → SERIAL, Primary Key
-//   tenant_id                   → INTEGER, FK → tenants.id
+//   shop_id                   → INTEGER, FK → shops.id
 //   name                        → VARCHAR, category display name
 //   slug                        → VARCHAR, URL-friendly name (NEW!)
 //   parent_id                   → INTEGER, FK → categories.id (NULL = top level)
@@ -28,7 +28,7 @@ import sequelize from '../config/database';    // our database connection instan
 // each instance of Category = one row = one category inside one shop
 class Category extends Model {
   declare id: number;                               // primary key — auto generated
-  declare tenant_id: number;                        // which shop owns this category
+  declare shop_id: number;                        // which shop owns this category
   declare name: string;                             // category display name → "Electronics"
   declare slug: string;                             // URL-friendly → "electronics"
                                                     // used in URL: /shop/electronics
@@ -46,8 +46,8 @@ Category.init(
       primaryKey: true,          // unique identifier for each category
       autoIncrement: true,       // database auto-generates: 1, 2, 3...
     },
-    tenant_id: {
-      type: DataTypes.INTEGER,   // whole number — references tenants.id
+    shop_id: {
+      type: DataTypes.INTEGER,   // whole number — references shops.id
       allowNull: false,          // required — every category must belong to a shop
     },
     name: {
@@ -94,11 +94,11 @@ export default Category;
     parent_id self-reference → categories can be nested inside each other
 
   SERVICE:
-    category.service.ts → Category.findAll({ where: { tenant_id } }) → get all categories for shop
+    category.service.ts → Category.findAll({ where: { shop_id } }) → get all categories for shop
     category.service.ts → Category.findAll({ where: { parent_id: null } }) → get top-level only
 
   RELATIONS (defined in models/index.ts):
-    Category belongs to Tenant              (via tenant_id)
+    Category belongs to shop              (via shop_id)
     Category has many Products              (via category_id)
     Category has many Subcategories         (via parent_id) ← self-reference!
     Category belongs to Parent Category     (via parent_id) ← self-reference!
@@ -113,13 +113,13 @@ export default Category;
   MULTI-TENANCY:
     Ahmed Store has: Food, Oils, Spices
     Duhok Electronics has: Electronics, Phones, Laptops
-    WHERE tenant_id = 1 → only Ahmed's categories ✅
+    WHERE shop_id = 1 → only Ahmed's categories ✅
 
   EXAMPLE:
   ─────────
   categories table in PostgreSQL:
   ┌────┬───────────┬─────────────┬──────────────┬───────────┐
-  │ id │ tenant_id │ name        │ slug         │ parent_id │
+  │ id │ shop_id │ name        │ slug         │ parent_id │
   ├────┼───────────┼─────────────┼──────────────┼───────────┤
   │ 1  │ 1         │ Food        │ food         │ NULL      │
   │ 2  │ 1         │ Oils        │ oils         │ 1         │

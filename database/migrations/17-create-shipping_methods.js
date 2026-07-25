@@ -10,10 +10,10 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
-      tenant_id: {
+      shop_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'tenants', key: 'id' },
+        references: { model: 'shops', key: 'id' },
         onDelete: 'CASCADE',
       },
       name: {
@@ -44,8 +44,8 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex('shipping_methods', ['tenant_id'], {
-      name: 'idx_shipping_methods_tenant_id',
+    await queryInterface.addIndex('shipping_methods', ['shop_id'], {
+      name: 'idx_shipping_methods_shop_id',
     });
   },
 

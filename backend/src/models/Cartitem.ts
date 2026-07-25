@@ -4,7 +4,7 @@
 // COLUMNS:
 //   id         → SERIAL, Primary Key
 //   user_id    → INTEGER, FK → users.id
-//   tenant_id  → INTEGER, FK → tenants.id
+//   shop_id  → INTEGER, FK → shops.id
 //   product_id → INTEGER, FK → products.id
 //   variant_id → INTEGER, FK → product_variants.id (nullable)
 //   quantity   → INTEGER, default 1
@@ -21,7 +21,7 @@ import sequelize from '../config/database';
 class CartItem extends Model {
   declare id: number;
   declare user_id: number;          // which user's cart this belongs to
-  declare tenant_id: number;        // which shop's cart (multi-tenant isolation!)
+  declare shop_id: number;        // which shop's cart (multi-shop isolation!)
   declare product_id: number;       // which product is in the cart
   declare variant_id: number | null; // which specific variant (size, color)
                                      // NULL = no variant, just the base product
@@ -32,7 +32,7 @@ CartItem.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
     user_id: { type: DataTypes.INTEGER, allowNull: false },
-    tenant_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     product_id: { type: DataTypes.INTEGER, allowNull: false },
     variant_id: {
       type: DataTypes.INTEGER,

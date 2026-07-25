@@ -11,12 +11,12 @@ module.exports={ //to export the object on the file
     async up(queryInterface, Sequelize){ //up function to add the table to the database
         await queryInterface.sequelize.query(`
             DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tenant_status') THEN
-                    CREATE TYPE tenant_status AS ENUM('active','inactive','suspended');
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'shop_status') THEN
+                    CREATE TYPE shop_status AS ENUM('active','inactive','suspended');
                 END IF;
             END $$;
         `);
-        await queryInterface.createTable('tenants',{  //creating table with attributes
+        await queryInterface.createTable('shops',{  //creating table with attributes
               id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -68,8 +68,8 @@ module.exports={ //to export the object on the file
       },
     });
 
-    await queryInterface.addIndex('tenants',['slug'],{ //create index for the column slug in table tenants
-        name:'idx_tenants_slug',
+    await queryInterface.addIndex('shops',['slug'],{ //create index for the column slug in table shops
+        name:'idx_shops_slug',
     });
 
     await queryInterface.sequelize.query(  //create function of update in each row
@@ -84,24 +84,24 @@ module.exports={ //to export the object on the file
 
     await queryInterface.sequelize.query(  //create trigger. and trigger tells the function when to work
         `create trigger set_timestamp
-        before update on tenants
+        before update on shops
         for each row execute function updated_timestamp();`
     );
 },   
 
     async down(queryInterface,Sequelize){  //used down function if we have an error or have changes
         await queryInterface.sequelize.query(
-            `drop trigger if exists set_timestamp on tenants`
+            `drop trigger if exists set_timestamp on shops`
         );
 
-        await queryInterface.dropTable('tenants');
+        await queryInterface.dropTable('shops');
 
         await queryInterface.sequelize.query(
-            `drop type if exists tenant_status cascade`
+            `drop type if exists shop_status cascade`
         );
 
         await queryInterface.sequelize.query(
-            `drop type if exists "enum_tenants_status" cascade`
+            `drop type if exists "enum_shops_status" cascade`
         );
 
         await queryInterface.sequelize.query(

@@ -4,7 +4,7 @@
 // COLUMNS:
 //   id         → SERIAL, Primary Key
 //   user_id    → INTEGER, FK → users.id
-//   tenant_id  → INTEGER, FK → tenants.id
+//   shop_id  → INTEGER, FK → shops.id
 //   label      → VARCHAR, address nickname, default 'Home'
 //   full_name  → VARCHAR, recipient name for this address
 //   phone      → VARCHAR, recipient phone for delivery
@@ -24,7 +24,7 @@ import sequelize from '../config/database';
 class Address extends Model {
   declare id: number;
   declare user_id: number;        // which user this address belongs to
-  declare tenant_id: number;      // which shop context (multi-tenant!)
+  declare shop_id: number;      // which shop context (multi-shop!)
   declare label: string;          // address nickname → "Home", "Work", "Mom's House"
   declare full_name: string;      // recipient name → "Khalil Ahmed"
   declare phone: string;          // recipient phone → "07501234567"
@@ -40,7 +40,7 @@ Address.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
     user_id: { type: DataTypes.INTEGER, allowNull: false },
-    tenant_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     label: {
       type: DataTypes.STRING,
       allowNull: false,

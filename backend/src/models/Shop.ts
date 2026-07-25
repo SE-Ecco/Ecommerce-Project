@@ -1,4 +1,4 @@
-// WHAT: Sequelize model for "shops" table — one row = one shop/tenant
+// WHAT: Sequelize model for "shops" table — one row = one shop/shop
 // IMPORTS: sequelize, config/database.ts
 // USED BY: models/index.ts, services/shop.service.ts
 // COLUMNS:
@@ -11,9 +11,9 @@
 //   created_at   → TIMESTAMP
 //   updated_at   → TIMESTAMP
 
-// WHAT: Sequelize model for "tenants" table — one row = one shop on the platform
+// WHAT: Sequelize model for "shops" table — one row = one shop on the platform
 // IMPORTS: sequelize, config/database.ts
-// USED BY: models/index.ts, services/tenant.service.ts
+// USED BY: models/index.ts, services/shop.service.ts
 // COLUMNS:
 //   id                         → SERIAL, Primary Key
 //   name                       → VARCHAR, shop display name
@@ -29,9 +29,9 @@
 import { Model, DataTypes } from 'sequelize'; // Model = base class, DataTypes = column types
 import sequelize from '../config/database';    // our database connection instance
 
-// Tenant class = blueprint of the tenants table
-// each instance of Tenant = one row = one shop on the platform
-class Tenant extends Model {
+// shop class = blueprint of the shops table
+// each instance of shop = one row = one shop on the platform
+class shop extends Model {
   declare id: number;                          // primary key — auto generated
   declare name: string;                        // shop display name → "Ahmed Store"
   declare slug: string;                        // URL-friendly unique name → "ahmed-store"
@@ -42,12 +42,12 @@ class Tenant extends Model {
   declare status: 'active' | 'inactive' | 'suspended'; // active = open | suspended = banned
 }
 
-// Tenant.init() = tell Sequelize exact columns + rules for this table
-Tenant.init(
+// shop.init() = tell Sequelize exact columns + rules for this table
+shop.init(
   {
     id: {
       type: DataTypes.INTEGER,   // whole number
-      primaryKey: true,          // unique identifier for each tenant
+      primaryKey: true,          // unique identifier for each shop
       autoIncrement: true,       // database auto-generates: 1, 2, 3...
     },
     name: {
@@ -86,41 +86,41 @@ Tenant.init(
   },
   {
     sequelize,            // which database connection to use
-    modelName: 'Tenant',  // Sequelize internal model name
-    tableName: 'tenants', // exact PostgreSQL table name
+    modelName: 'shop',  // Sequelize internal model name
+    tableName: 'shops', // exact PostgreSQL table name
     timestamps: true,     // auto adds created_at + updated_at columns
     underscored: true,    // converts camelCase to snake_case in DB
   }
 );
 
-export default Tenant;
+export default shop;
 
 /*
   HOW THIS FILE CONNECTS:
   ─────────────────────────────────────────────────────────────────
 
   DATABASE:
-    Tenant.init() → Sequelize manages "tenants" table in PostgreSQL
+    shop.init() → Sequelize manages "shops" table in PostgreSQL
     slug unique constraint → database rejects duplicate slugs
     cloudinary_logo_public_id unique → each image has one owner
 
   SERVICE:
-    tenant.service.ts → Tenant.findAll() → get all shops
-    tenant.service.ts → Tenant.findOne({ where: { slug } }) → get one shop by URL
+    shop.service.ts → shop.findAll() → get all shops
+    shop.service.ts → shop.findOne({ where: { slug } }) → get one shop by URL
 
   RELATIONS (defined in models/index.ts):
-    Tenant has many Users          (via tenant_id)
-    Tenant has many Products       (via tenant_id)
-    Tenant has many Orders         (via tenant_id)
-    Tenant has one  ShopSettings   (via tenant_id)
-    Tenant has many Categories     (via tenant_id)
-    Tenant has many FlashSales     (via tenant_id)
-    Tenant has many ShippingMethods(via tenant_id)
+    shop has many Users          (via shop_id)
+    shop has many Products       (via shop_id)
+    shop has many Orders         (via shop_id)
+    shop has one  ShopSettings   (via shop_id)
+    shop has many Categories     (via shop_id)
+    shop has many FlashSales     (via shop_id)
+    shop has many ShippingMethods(via shop_id)
 
   MULTI-TENANCY:
-    tenants = CENTER of everything
-    every other table has tenant_id pointing here
-    WHERE tenant_id = ? → entire data isolation system 🔒
+    shops = CENTER of everything
+    every other table has shop_id pointing here
+    WHERE shop_id = ? → entire data isolation system 🔒
 
   CLOUDINARY:
     when vendor uploads logo → backend gets cloudinary_url + public_id from Cloudinary
@@ -130,7 +130,7 @@ export default Tenant;
 
   EXAMPLE:
   ─────────
-  tenants table in PostgreSQL:
+  shops table in PostgreSQL:
   ┌────┬──────────────────┬──────────────────────┬───────────┐
   │ id │ name             │ slug                 │ status    │
   ├────┼──────────────────┼──────────────────────┼───────────┤
@@ -139,8 +139,8 @@ export default Tenant;
   │ 3  │ Old Shop         │ old-shop             │ suspended │
   └────┴──────────────────┴──────────────────────┴───────────┘
 
-  Tenant.findAll() → returns all 3 rows ✅
-  Tenant.findOne({ where: { slug: "ahmed-store" } }) → returns row 1 ✅
+  shop.findAll() → returns all 3 rows ✅
+  shop.findOne({ where: { slug: "ahmed-store" } }) → returns row 1 ✅
   status: 'suspended' → super_admin blocked this shop 🛑
 */
 /*

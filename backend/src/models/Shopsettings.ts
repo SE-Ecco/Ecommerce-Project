@@ -3,7 +3,7 @@
 // USED BY: models/index.ts, services/settings.service.ts
 // COLUMNS:
 //   id          → SERIAL, Primary Key
-//   tenant_id   → INTEGER, FK → tenants.id, UNIQUE (one-to-one!)
+//   shop_id   → INTEGER, FK → shops.id, UNIQUE (one-to-one!)
 //   currency    → VARCHAR, default 'IQD' (Iraqi Dinar for Duhok market!)
 //   language    → VARCHAR, default 'ar' (Arabic default)
 //   theme_color → VARCHAR, hex color code, default '#3B82F6'
@@ -12,17 +12,17 @@
 //   extra       → JSONB, future settings without new migrations!
 //   created_at  → TIMESTAMP
 //   updated_at  → TIMESTAMP
-// NOTE: tenant_id is UNIQUE → one row per shop (one-to-one relationship!)
+// NOTE: shop_id is UNIQUE → one row per shop (one-to-one relationship!)
 
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/database';
 
 // ShopSettings class = blueprint of the shop_settings table
 // each instance = configuration settings for ONE shop
-// one shop → one settings row (one-to-one, enforced by UNIQUE on tenant_id)
+// one shop → one settings row (one-to-one, enforced by UNIQUE on shop_id)
 class ShopSettings extends Model {
   declare id: number;
-  declare tenant_id: number;        // which shop these settings belong to (UNIQUE!)
+  declare shop_id: number;        // which shop these settings belong to (UNIQUE!)
   declare currency: string;         // currency code → "IQD" (Iraqi Dinar for Duhok!) 🇮🇶
   declare language: string;         // language code → "ar" (Arabic), "ku" (Kurdish), "en"
   declare theme_color: string | null; // shop brand color → "#3B82F6" (blue)
@@ -36,7 +36,7 @@ class ShopSettings extends Model {
 ShopSettings.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
-    tenant_id: {
+    shop_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       unique: true,              // ONE settings row per shop — enforced here AND in DB

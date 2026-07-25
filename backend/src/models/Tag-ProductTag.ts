@@ -5,7 +5,7 @@
 // USED BY: models/index.ts, services/product.service.ts
 // TAG COLUMNS:
 //   id         → SERIAL, Primary Key
-//   tenant_id  → INTEGER, FK → tenants.id
+//   shop_id  → INTEGER, FK → shops.id
 //   name       → VARCHAR, tag name (UNIQUE per shop)
 //   created_at → TIMESTAMP
 // PRODUCT_TAG COLUMNS:
@@ -21,7 +21,7 @@ import sequelize from '../config/database';
 // example: Ahmed Store has tags: "organic", "local", "fresh"
 export class Tag extends Model {
   declare id: number;
-  declare tenant_id: number;   // which shop owns this tag
+  declare shop_id: number;   // which shop owns this tag
   declare name: string;        // tag label → "organic", "local", "fresh"
                                // UNIQUE per shop (no duplicate tags in same shop)
   declare created_at: Date;
@@ -30,7 +30,7 @@ export class Tag extends Model {
 Tag.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
-    tenant_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     name: {
       type: DataTypes.STRING,
       allowNull: false,        // required — tag must have a name

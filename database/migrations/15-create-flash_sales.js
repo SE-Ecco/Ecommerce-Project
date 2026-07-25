@@ -10,10 +10,10 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
-      tenant_id: {
+      shop_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'tenants', key: 'id' },
+        references: { model: 'shops', key: 'id' },
         onDelete: 'CASCADE',
       },
       product_id: {
@@ -57,7 +57,7 @@ module.exports = {
       ADD CONSTRAINT valid_flash_discount CHECK (discount_pct > 0 AND discount_pct <= 100)
     `);
 
-    await queryInterface.addIndex('flash_sales', ['tenant_id'], { name: 'idx_flash_sales_tenant_id' });
+    await queryInterface.addIndex('flash_sales', ['shop_id'], { name: 'idx_flash_sales_shop_id' });
     await queryInterface.addIndex('flash_sales', ['product_id'], { name: 'idx_flash_sales_product_id' });
     await queryInterface.addIndex('flash_sales', ['is_active', 'starts_at', 'ends_at'], {
       name: 'idx_flash_sales_active',

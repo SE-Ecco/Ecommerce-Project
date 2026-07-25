@@ -4,7 +4,7 @@
 // COLUMNS:
 //   id         → SERIAL, Primary Key
 //   product_id → INTEGER, FK → products.id
-//   tenant_id  → INTEGER, FK → tenants.id
+//   shop_id  → INTEGER, FK → shops.id
 //   user_id    → INTEGER, FK → users.id (NULL = guest visitor!)
 //   viewed_at  → TIMESTAMP, when the view happened
 
@@ -14,7 +14,7 @@ import sequelize from '../config/database';
 class ProductView extends Model {
   declare id: number;
   declare product_id: number;    // which product was viewed
-  declare tenant_id: number;     // which shop it belongs to
+  declare shop_id: number;     // which shop it belongs to
   declare user_id: number | null; // NULL = guest (not logged in)
                                   // number = logged-in customer
   declare viewed_at: Date;        // exact time of the view
@@ -24,7 +24,7 @@ ProductView.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
     product_id: { type: DataTypes.INTEGER, allowNull: false },
-    tenant_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: true,           // NULL = guest view — we still count it!

@@ -16,10 +16,10 @@ module.exports = {
         references: { model: 'users', key: 'id' },
         onDelete: 'CASCADE',
       },
-      tenant_id: {
+      shop_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'tenants', key: 'id' },
+        references: { model: 'shops', key: 'id' },
         onDelete: 'CASCADE',
       },
       label: {
@@ -68,7 +68,7 @@ module.exports = {
     });
 
     await queryInterface.addIndex('addresses', ['user_id'], { name: 'idx_addresses_user_id' });
-    await queryInterface.addIndex('addresses', ['tenant_id'], { name: 'idx_addresses_tenant_id' });
+    await queryInterface.addIndex('addresses', ['shop_id'], { name: 'idx_addresses_shop_id' });
 
     await queryInterface.sequelize.query(`
       CREATE TRIGGER set_timestamp

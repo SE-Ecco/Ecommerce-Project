@@ -5,7 +5,7 @@
 // USED BY: models/index.ts, services/order.service.ts
 // ORDER COLUMNS:
 //   id              → SERIAL, Primary Key
-//   tenant_id       → INTEGER, FK → tenants.id
+//   shop_id       → INTEGER, FK → shops.id
 //   user_id         → INTEGER, FK → users.id
 //   address_id      → INTEGER, FK → addresses.id (nullable)
 //   status          → ENUM, order lifecycle stage
@@ -31,7 +31,7 @@ import sequelize from '../config/database';
 // think of it as a receipt HEADER (date, total, status)
 export class Order extends Model {
   declare id: number;
-  declare tenant_id: number;         // which shop received this order
+  declare shop_id: number;         // which shop received this order
   declare user_id: number;           // which customer placed this order
   declare address_id: number | null; // delivery address (nullable — may be pickup)
   declare status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
@@ -43,7 +43,7 @@ export class Order extends Model {
 Order.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
-    tenant_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     user_id: { type: DataTypes.INTEGER, allowNull: false },
     address_id: { type: DataTypes.INTEGER, allowNull: true },
     status: {

@@ -4,7 +4,7 @@
 // COLUMNS:
 //   id         → SERIAL, Primary Key
 //   user_id    → INTEGER, FK → users.id
-//   tenant_id  → INTEGER, FK → tenants.id
+//   shop_id  → INTEGER, FK → shops.id
 //   type       → VARCHAR, notification category
 //   title      → VARCHAR, short notification title
 //   body       → TEXT, full notification message
@@ -20,7 +20,7 @@ import sequelize from '../config/database';    // our database connection instan
 class Notification extends Model {
   declare id: number;
   declare user_id: number;         // which user receives this notification
-  declare tenant_id: number;       // which shop this notification is from
+  declare shop_id: number;       // which shop this notification is from
   declare type: string;            // category → "order_shipped", "flash_sale", "review_reply"
                                    // used by frontend to show correct icon + style
   declare title: string;           // short title → "Your order has shipped! 🚚"
@@ -46,9 +46,9 @@ Notification.init(
       type: DataTypes.INTEGER,   // references users.id
       allowNull: false,          // required — every notification must have a recipient
     },
-    tenant_id: {
-      type: DataTypes.INTEGER,   // references tenants.id
-      allowNull: false,          // required — multi-tenant isolation!
+    shop_id: {
+      type: DataTypes.INTEGER,   // references shops.id
+      allowNull: false,          // required — multi-shop isolation!
     },
     type: {
       type: DataTypes.STRING,    // text value → "order_shipped", "flash_sale"
@@ -91,13 +91,13 @@ export default Notification;
     is_read index → fast lookup of unread notifications per user
 
   SERVICE:
-    notification.service.ts → Notification.create({ user_id, tenant_id, type, title, body })
+    notification.service.ts → Notification.create({ user_id, shop_id, type, title, body })
     notification.service.ts → Notification.findAll({ where: { user_id, is_read: false } })
     notification.service.ts → notification.update({ is_read: true }) → mark as read
 
   RELATIONS (defined in models/index.ts):
     Notification belongs to User   (via user_id)
-    Notification belongs to Tenant (via tenant_id)
+    Notification belongs to shop (via shop_id)
 
   NOTIFICATION TYPES USED IN THIS PROJECT:
     "order_confirmed"  → customer placed order successfully
