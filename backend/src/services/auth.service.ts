@@ -74,7 +74,7 @@ export const login = async (
   // hacker can't tell WHICH one is wrong → can't guess valid emails! 🔒
 
   // 2. compare plain password with stored hash
-  const isPasswordMatch = await comparePassword(password, user.password);
+  const isPasswordMatch = await comparePassword(password, user.password_hash);
   // comparePassword() → bcrypt.compare(plain, hash) → true or false
   // bcrypt internally hashes the plain password and compares with stored hash
   if (!isPasswordMatch) throw new Error('Invalid email or password');
