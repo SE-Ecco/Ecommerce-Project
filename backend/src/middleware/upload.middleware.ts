@@ -4,24 +4,36 @@
 // RESULT: After this runs, req.file.path = the Cloudinary image URL — save this to DB!
 // LIMITS: 5MB max, jpeg/png/webp only
 // EXPORTS: upload
+
 import multer from 'multer'
 import { CloudinaryStorage } from 'multer-storage-cloudinary'
 import cloudinary from '../config/cloudinary'
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: async (req, file) => {
-    return {
-      folder: 'products',
-    }
-  },
-})
-export const upload = multer({ storage: storage })
+export const upload = (folder: string) => {
+  const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+      return {
+        folder: folder,
+      }
+    },
+  })
 
-
+  return multer({ storage: storage })
+}
 
 // 📖 upload.middleware.ts — FULL story, every line explained 🎬
+// 📌 everything that was OUTSIDE (storage, upload) is now INSIDE the function
+// 📌 folder: 'products' (hardcoded text) → folder: folder (the parameter you pass in)
+// 📌 instead of exporting a READY-MADE upload object,
+//    you now export a FUNCTION that BUILDS one, fresh, whenever called
+// 📌 return multer({...}) → hands back the finished upload tool
 
+// 🧠 how routes will use it differently now:
+
+// OLD: upload.single('image')
+// NEW: upload('products').single('image')
+//               👆 you now MUST tell it which folder each time
 // 🎭 the big picture
 // 🏪 imagine you're a shop owner adding a NEW product with a photo
 
