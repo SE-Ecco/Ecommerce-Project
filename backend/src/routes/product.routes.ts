@@ -16,8 +16,8 @@ import { createProductValidation, updateProductValidation } from '../validations
 import { upload } from '../middleware/upload.middleware'
 const router = Router()
 
-router.post('/', authenticate, shopMiddleware, upload.single('image'), createProductValidation, validateMiddleware, createProduct)
-router.put('/:id', authenticate, shopMiddleware, upload.single('image'), updateProductValidation, validateMiddleware, updateProduct)
+router.post('/', authenticate, shopMiddleware, upload('products').single('image'), createProductValidation, validateMiddleware, createProduct)
+router.put('/:id', authenticate, shopMiddleware, upload('products').single('image'), updateProductValidation, validateMiddleware, updateProduct)
 router.get('/', authenticate, shopMiddleware , getProducts)
 router.get('/:id', authenticate, shopMiddleware , getProductById)
 router.delete('/:id', authenticate, shopMiddleware, deleteProduct)
