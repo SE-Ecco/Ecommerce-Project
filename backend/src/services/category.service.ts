@@ -3,6 +3,7 @@
 // USED BY: controllers/category.controller.ts
 // ⚠️ Always filters by shop_id — shop_admin can only manage their own categories
 import Category from '../models/Category';
+import cloudinary from '../config/cloudinary';
 
 export const getCategories = async (shop_id: number) => {
 
@@ -25,7 +26,12 @@ export const getCategoryById = async (id: number, shop_id: number) => {
 
 export const createCategory = async (
     shop_id: number,
-    data: { name: string; }
+    data: { name: string, 
+            slug: string,
+            parent_id?:number,
+            cloudinary_banner_url?: string,
+            cloudinary_banner_public_id?: string
+    }
 ) => {
     return await Category.create({ shop_id, ...data });
 }
@@ -33,7 +39,11 @@ export const createCategory = async (
 export const updateCategory = async (
     shop_id: number,
     id: number,
-    data: { name: string; }
+    data: { name?: string, 
+            slug?: string,
+            parent_id?:number,
+            cloudinary_banner_url?: string,
+            cloudinary_banner_public_id?: string }
 ) => {
     const category = await getCategoryById(id, shop_id);
     await category.update(data);

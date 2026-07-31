@@ -61,7 +61,14 @@ export const updateProduct = async (req: Request<{ id: string }>, res: Response)
   try {
     const shop_id = req.user!.shop_id as number;
     const id = Number(req.params.id); // convert string → number
-    const product = await productService.updateProduct(id, shop_id, req.body);
+    const data = {
+          ...req.body,
+          ...(req.file && {
+        cloudinary_banner_url: req.file.path,
+        cloudinary_banner_public_id: req.file.filename,
+      }),
+    };
+    const product = await productService.updateProduct(shop_id, id, data);
     res.status(200).json({ success: true, data: product });
   } catch (error) {
     res.status(404).json({ success: false, message: (error as Error).message });
