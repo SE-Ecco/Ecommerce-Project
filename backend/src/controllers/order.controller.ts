@@ -3,117 +3,97 @@
 // USED BY: routes/order.routes.ts
 // HANDLES: POST place order, GET my orders, GET shop orders, PATCH update status
 
-import { Request, Response, NextFunction } from 'express';
+// IMPORTS: services/order.service.ts, utils/response.ts
+// USED BY: routes/order.routes.ts
+// HANDLES: POST place order, GET my orders, GET shop orders, PATCH update status
+
+import { Request, Response } from 'express';
 import * as orderService from '../services/order.service';
-import { successResponse } from '@/utils/response';
+import { successResponse, errorResponse } from '../utils/response';
 
 // ── PLACE ORDER ──────────────────────────────────────────────
 // POST /api/orders
-export const placeOrder = async (
-    req: Request,       // WHY: carries everything the client sent — params, body, and req.user (from auth.middleware)
-    res: Response,       // WHY: needed to actually send the reply back to the client
-    next: NextFunction   // WHY: needed to forward errors to error.middleware — controller never handles errors itself
-) => {
+export const placeOrder = async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = req.user?.id;        // WHY: from JWT (trusted), NEVER from req.body
-        const tenantId = req.user?.shop_id; // WHY: which shop this order is for (trusted, from token)
+        const userId = req.user?.id;
+        const shopId = req.user?.shop_id;
 
-        // WHY: defensive check — auth.middleware SHOULD guarantee these exist,
-        // but this protects against middleware bugs + narrows TS type to `number`
-        if (!userId || !tenantId) {
+        if (!userId || !shopId) {
             throw new Error('User Id and Shop Id are required');
         }
 
-        const { items, address_id, notes } = req.body; // WHY: WHAT they're ordering — safe to trust from client
+        const { items, address_id, notes } = req.body;
 
         const order = await orderService.placeOrder(
-            userId,              // WHY passed: service needs to know WHO is ordering
-            tenantId,            // WHY passed: service needs to know WHICH shop, to validate products belong to it
-            items,               // WHY passed: service needs WHAT to actually create as OrderItems
-            address_id ?? null,  // WHY passed + ??: optional — pickup orders have no address
-            notes ?? null        // WHY passed + ??: optional — most orders have no special note
+            userId,
+            shopId,
+            items,
+            address_id ?? null,
+            notes ?? null
         );
 
-        res.status(201).json(successResponse(order)); // WHY 201: this is a CREATE action
+        res.status(201).json(successResponse(order));
     } catch (error) {
-        next(error); // WHY: forward to error.middleware, controller never builds error responses itself
+        res.status(500).json(errorResponse((error as Error).message));
     }
 };
 
 // ── GET MY ORDERS ────────────────────────────────────────────
 // GET /api/orders/my-orders
-export const getMyOrders = async (
-    req: Request,       // WHY: needed to read req.user (who is asking)
-    res: Response,       // WHY: needed to send back their order list
-    next: NextFunction   // WHY: forwards any DB/service errors to error.middleware
-) => {
+export const getMyOrders = async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = req.user?.id; // WHY: only fetch orders belonging to the LOGGED-IN user
+        const userId = req.user?.id;
 
         if (!userId) {
-            throw new Error('User ID is required'); // WHY: same defensive guard as above
+            throw new Error('User ID is required');
         }
 
-        const orders = await orderService.getMyOrders(userId); // WHY passed: service needs to know WHOSE orders to fetch
-
-        res.status(200).json(successResponse(orders)); // WHY 200: this is a READ action, not a create
+        const orders = await orderService.getMyOrders(userId);
+        res.status(200).json(successResponse(orders));
     } catch (error) {
-        next(error);
+        res.status(500).json(errorResponse((error as Error).message));
     }
 };
 
 // ── GET SHOP ORDERS ──────────────────────────────────────────
 // GET /api/orders/shop-orders
-export const getShopOrders = async (
-    req: Request,       // WHY: needed to read req.user.shop_id (which shop is asking)
-    res: Response,       // WHY: needed to send back the shop's order list
-    next: NextFunction   // WHY: forwards errors to error.middleware
-) => {
+export const getShopOrders = async (req: Request, res: Response): Promise<void> => {
     try {
-        const tenantId = req.user?.shop_id; // WHY: shop owner sees ONLY their own shop's orders
+        const shopId = req.user?.shop_id;
 
-        if (!tenantId) {
+        if (!shopId) {
             throw new Error('shop ID is required');
         }
 
-        const orders = await orderService.getShopOrders(tenantId); // WHY passed: service needs to know WHICH shop's orders to fetch
+        const orders = await orderService.getShopOrders(shopId);
         res.status(200).json(successResponse(orders));
     } catch (error) {
-        next(error);
+        res.status(500).json(errorResponse((error as Error).message));
     }
 };
 
 // ── UPDATE ORDER STATUS ──────────────────────────────────────
 // PATCH /api/orders/:id/status
-export const updateStatus = async (
-    req: Request,       // WHY: carries :id in params, new status in body, and req.user for security check
-    res: Response,       // WHY: needed to send back the updated order
-    next: NextFunction   // WHY: forwards errors to error.middleware
-) => {
+export const updateStatus = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
     try {
-        const orderId = Number(req.params.id);  // WHY: which order — comes from the URL, not body
-        const tenantId = req.user?.shop_id;      // WHY: security — proves this shop actually owns the order
-        const { status } = req.body;              // WHY: new status value — sent by shop owner
+        const orderId = Number(req.params.id);
+        const shopId = req.user?.shop_id;
+        const { status } = req.body;
 
-        if (!tenantId) {
+        if (!shopId) {
             throw new Error('Shop ID is required');
         }
 
         if (!orderId || isNaN(orderId)) {
-            throw new Error('Valid order ID is required'); // WHY: guards against bad/non-numeric :id in URL
+            throw new Error('Valid order ID is required');
         }
 
-        const order = await orderService.updateStatus(
-            orderId,   // WHY passed: service needs to know WHICH order to update
-            tenantId,  // WHY passed: service uses this to verify the order belongs to THIS shop (security)
-            status     // WHY passed: service needs the NEW status value to save
-        );
+        const order = await orderService.updateStatus(orderId, shopId, status);
         res.status(200).json(successResponse(order));
     } catch (error) {
-        next(error);
+        res.status(404).json(errorResponse((error as Error).message));
     }
 };
-
 // ── 🍽️ THE STORY ─────────────────────────────────────────
 // order.controller.ts = the CASHIER 💼
 // customer/owner tells the cashier what they want (req)
