@@ -2,3 +2,104 @@
 // IMPORTS: services/order.service.ts, utils/response.ts
 // USED BY: routes/order.routes.ts
 // HANDLES: POST place order, GET my orders, GET shop orders, PATCH update status
+
+// IMPORTS: services/order.service.ts, utils/response.ts
+// USED BY: routes/order.routes.ts
+// HANDLES: POST place order, GET my orders, GET shop orders, PATCH update status
+
+import { Request, Response } from 'express';
+import * as orderService from '../services/order.service';
+import { successResponse, errorResponse } from '../utils/response';
+
+// ── PLACE ORDER ──────────────────────────────────────────────
+// POST /api/orders
+export const placeOrder = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        const shopId = req.user?.shop_id;
+
+        if (!userId || !shopId) {
+            throw new Error('User Id and Shop Id are required');
+        }
+
+        const { items, address_id, notes } = req.body;
+
+        const order = await orderService.placeOrder(
+            userId,
+            shopId,
+            items,
+            address_id ?? null,
+            notes ?? null
+        );
+
+        res.status(201).json(successResponse(order));
+    } catch (error) {
+        res.status(500).json(errorResponse((error as Error).message));
+    }
+};
+
+// ── GET MY ORDERS ────────────────────────────────────────────
+// GET /api/orders/my-orders
+export const getMyOrders = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+
+        if (!userId) {
+            throw new Error('User ID is required');
+        }
+
+        const orders = await orderService.getMyOrders(userId);
+        res.status(200).json(successResponse(orders));
+    } catch (error) {
+        res.status(500).json(errorResponse((error as Error).message));
+    }
+};
+
+// ── GET SHOP ORDERS ──────────────────────────────────────────
+// GET /api/orders/shop-orders
+export const getShopOrders = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const shopId = req.user?.shop_id;
+
+        if (!shopId) {
+            throw new Error('shop ID is required');
+        }
+
+        const orders = await orderService.getShopOrders(shopId);
+        res.status(200).json(successResponse(orders));
+    } catch (error) {
+        res.status(500).json(errorResponse((error as Error).message));
+    }
+};
+
+// ── UPDATE ORDER STATUS ──────────────────────────────────────
+// PATCH /api/orders/:id/status
+export const updateStatus = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+    try {
+        const orderId = Number(req.params.id);
+        const shopId = req.user?.shop_id;
+        const { status } = req.body;
+
+        if (!shopId) {
+            throw new Error('Shop ID is required');
+        }
+
+        if (!orderId || isNaN(orderId)) {
+            throw new Error('Valid order ID is required');
+        }
+
+        const order = await orderService.updateStatus(orderId, shopId, status);
+        res.status(200).json(successResponse(order));
+    } catch (error) {
+        res.status(404).json(errorResponse((error as Error).message));
+    }
+};
+// ── 🍽️ THE STORY ─────────────────────────────────────────
+// order.controller.ts = the CASHIER 💼
+// customer/owner tells the cashier what they want (req)
+// cashier checks their ID badge is really attached (req.user? guard)
+// cashier passes the exact order to the chef (orderService)
+// chef cooks (service.ts does the real work)
+// cashier wraps the plate in the SAME standard box every time (successResponse)
+// if the chef drops the pan → cashier just calls the manager (next(error)),
+//   doesn't try to clean it up themselves
