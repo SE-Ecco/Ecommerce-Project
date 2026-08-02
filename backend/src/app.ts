@@ -10,9 +10,9 @@ import authRoutes from './routes/auth.routes';
 import shops from './routes/shop.routes';   
 import products from './routes/product.routes';  
 import categories from './routes/category.routes';  
-//import orders from './routes/order.routes';  
+import orders from './routes/order.routes';  
 //import admin from './routes/admin.routes';  
-
+import cartRoutes from './routes/cart.routes';
 
 const app = express();
 
@@ -24,9 +24,9 @@ app.use('/api/auth', authRoutes);                       //app.use('/api/auth', a
 app.use('/api/shops', shops);                                  // routes added here later
 app.use('/api/products', products);
 app.use('/api/categories', categories);
-// app.use('/api/auth', orders);
+app.use('/api/orders', orders);
 // app.use('/api/auth', admin);
-
+app.use('/api/cart', cartRoutes);
 export default app;
 
 // ROUTE REGISTRATION:
