@@ -14,9 +14,9 @@ pnpm dev              # run frontend + backend together
 ## 📁 Structure
 | Folder     | Who works here              | Tech |
 |------------|-----------------------------|------|
-| frontend/  | Zhegr + Rasheed + Ahmed     | React + TS + Vite |
+| frontend/  | Zhegr                       | React + TS + Vite |
 | backend/   | Jiwar + Alan                | Node + Express + TS |
-| database/  | Dlawar + Obaida + Khalil    | Sequelize CLI + PostgreSQL |
+| database/  | Khalil                      | Sequelize CLI + PostgreSQL |
 | docs/      | Everyone                    | Markdown |
 | tests/     | Everyone                    | Jest + Playwright |
 
