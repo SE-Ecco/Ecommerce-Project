@@ -4,7 +4,7 @@
 
 import Shop from '../models/Shop'; // Sequelize model — talks to shops table in DB
 import  sequelize  from '../config/database'; // Sequelize instance for transactions
-import { User } from '@/models';
+import { User } from '../models';
 
 // ===========================
 // GET ALL SHOPS
