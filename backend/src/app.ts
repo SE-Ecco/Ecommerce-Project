@@ -11,8 +11,9 @@ import shops from './routes/shop.routes';
 import products from './routes/product.routes';  
 import categories from './routes/category.routes';  
 import orders from './routes/order.routes';  
-//import admin from './routes/admin.routes';  
+import admin from './routes/admin.routes';  
 import cartRoutes from './routes/cart.routes';
+import addressRoutes from './routes/address.routes';
 
 const app = express();
 
@@ -25,8 +26,9 @@ app.use('/api/shops', shops);                                  // routes added h
 app.use('/api/products', products);
 app.use('/api/categories', categories);
 app.use('/api/orders', orders);
-// app.use('/api/auth', admin);
+app.use('/api/auth', admin);
 app.use('/api/cart', cartRoutes);
+app.use('/api/addresses', addressRoutes);
 export default app;
 
 // ROUTE REGISTRATION:
