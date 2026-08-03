@@ -16,6 +16,8 @@ import * as adminController from '../controllers/admin.controller';
 
 const router = Router();
 
+router.post('/shops', authenticate, authorize('super_admin'), adminController.createShop);
+
 router.get('/shops', authenticate, authorize('super_admin'), adminController.getAllShops);
 
 router.patch('/shops/:id/status', authenticate, authorize('super_admin'), adminController.updateShopStatus);
@@ -26,6 +28,7 @@ router.get('/users', authenticate, authorize('super_admin'), adminController.get
 // New routes after updates.
 
 router.patch('/users/:id/role', authenticate, authorize('super_admin'), adminController.changeUserRole);
+
 router.delete('/users/:id', authenticate, authorize('super_admin'), adminController.deleteUser);
 
 export default router;
