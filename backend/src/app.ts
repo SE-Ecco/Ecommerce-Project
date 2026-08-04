@@ -14,6 +14,8 @@ import orders from './routes/order.routes';
 import admin from './routes/admin.routes';  
 import cartRoutes from './routes/cart.routes';
 import addressRoutes from './routes/address.routes';
+import notificationRoutes from './routes/notification.routes';
+import wishlistRoutes from './routes/wishlist.routes';
 
 const app = express();
 
@@ -29,6 +31,8 @@ app.use('/api/orders', orders);
 app.use('/api/auth', admin);
 app.use('/api/cart', cartRoutes);
 app.use('/api/addresses', addressRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/wishlists', wishlistRoutes);
 export default app;
 
 // ROUTE REGISTRATION:
