@@ -1,15 +1,14 @@
-import { Model, DataTypes}  from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/database';
 
-// ── REVIEW ───────────────────────────────────────────────────
 class Review extends Model {
     declare id: number;
-    declare user_id: number;        // which user wrote this review
+    declare user_id: number;
     declare product_id: number;
-    declare shop_id: number;        // which shop this review belongs to
-    declare order_id: number | null;      // which order this review belongs to (nullable)
-    declare rating: number;         // 1-5 stars
-    declare comment: string | null; // optional text comment
+    declare shop_id: number;
+    declare order_id: number | null;
+    declare rating: number;
+    declare comment: string | null;
     declare created_at: Date;
 }
 
@@ -33,7 +32,7 @@ Review.init({
     },
     order_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true  // 🔧 Fix 1: matches declaration
     },
     rating: {
         type: DataTypes.INTEGER,
