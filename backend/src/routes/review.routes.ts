@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
-import { validateRequest } from '../middleware/validate.middleware';
+import { validateMiddleware } from '../middleware/validate.middleware';
 import { createReviewValidation } from '../validations/review.validation';
 import * as reviewController from '../controllers/review.controller';
 
@@ -11,7 +11,7 @@ router.post(
     '/',
     authenticate,
     createReviewValidation,  // 🔧 Fix 3: validation added
-    validateRequest,
+    validateMiddleware,
     reviewController.createReview
 );
 

@@ -124,6 +124,10 @@ shop.hasMany(Wishlist, {
   foreignKey: 'shop_id',
   as: 'wishlists',
 });
+shop.hasMany(ProductVariant, {
+  foreignKey: 'shop_id',
+  as: 'product_variants',
+});
 shop.hasMany(Address, { foreignKey: 'shop_id', as: 'addresses' });
 
 // ─────────────────────────────────────────────────────────────
@@ -270,6 +274,11 @@ ProductVariant.hasMany(OrderItem, {
   foreignKey: 'variant_id',
   as: 'order_items',
 });
+ProductVariant.belongsTo(shop, {
+  foreignKey: 'shop_id',
+  as: 'shop',
+});
+
 
 // ─────────────────────────────────────────────────────────────
 // PRODUCT REVIEW associations

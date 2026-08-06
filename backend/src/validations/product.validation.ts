@@ -59,7 +59,57 @@ export const updateProductValidation = [
   // if sent → must still be valid stock number
 
 ];
+// ===========================
+// CREATE VARIANT VALIDATION
+// ===========================
+// runs on → POST /api/products/:id/variants
+// required: name
+// optional: sku, price, stock, attributes
 
+export const createVariantValidation = [
+
+  body('name')
+    .notEmpty().withMessage('name cannot be empty'),
+  // same as createProduct name rule
+
+  body('sku')
+    .optional() 
+    .isString().withMessage('SKU must be text'),
+  // optional — not every shop uses SKUs
+
+  body('price')
+    .optional() 
+    .isFloat({ gt: 0 }).withMessage('Price must be a positive number'),
+  // optional — NULL means use parent product price
+
+  body('stock')
+    .optional() 
+    .isInt({ min: 0 }).withMessage('Stock must be 0 or more'),
+  // optional — defaults to 0
+
+];
+
+// ===========================
+// UPDATE VARIANT VALIDATION  
+// ===========================
+// runs on → PUT /api/products/:id/variants/:variantId
+// ALL fields optional
+
+export const updateVariantValidation = [
+
+  body('name')
+    .optional()
+    .notEmpty().withMessage('Name cannot be empty'),
+
+  body('price')
+    .optional()
+    .isFloat({ gt: 0 }).withMessage('Price must be a positive number'),
+
+  body('stock')
+    .optional()
+    .isInt({ min: 0 }).withMessage('Stock must be 0 or more'),
+
+];
 /*
   HOW THIS FILE WORKS:
   ─────────────────────────────────────────────────────────────────

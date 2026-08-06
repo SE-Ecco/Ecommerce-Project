@@ -4,21 +4,58 @@
 // HANDLES: GET all, GET by id, POST create, PUT update, DELETE
 // ⚠️ shop_id always from req.user (JWT) — never from req.body!
 
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction  } from 'express';
 import * as productService from '../services/product.service';
+import { successResponse } from '../utils/response';
 
+
+export const getVariants = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const shop_id = req.user!.shop_id as number;
+    const product_id = Number(req.params.id);
+    const variants = await productService.getVariantsByProduct(product_id, shop_id);
+    res.status(200).json(successResponse(variants));
+  } catch (error) { next(error); }
+};
+
+export const createVariant = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const shop_id = req.user!.shop_id as number;
+    const product_id = Number(req.params.id);
+    const variant = await productService.createVariant(product_id, shop_id, req.body);
+    res.status(201).json(successResponse(variant));
+  } catch (error) { next(error); }
+};
+
+export const updateVariant = async (req: Request<{ id: string; variantId: string }>, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const shop_id = req.user!.shop_id as number;
+    const id = Number(req.params.variantId); 
+    const variant = await productService.updateVariant(id, shop_id, req.body);
+    res.status(200).json(successResponse(variant));
+  } catch (error) { next(error); }
+};
+
+export const deleteVariant = async (req: Request<{ id: string; variantId: string }>, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const shop_id = req.user!.shop_id as number;
+    const id = Number(req.params.variantId); 
+    const result = await productService.deleteVariant(id, shop_id);
+    res.status(200).json(successResponse(result));
+  } catch (error) { next(error); }
+};
 
 // ===========================
 // GET ALL PRODUCTS
 // ===========================
 
-export const getProducts = async (req: Request, res: Response): Promise<void> => {
+export const getProducts = async (req: Request, res: Response,next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number; // from JWT — guaranteed by shopMiddleware
     const products = await productService.getProducts(shop_id);
-    res.status(200).json({ success: true, data: products });
+    res.status(200).json(successResponse(products));
   } catch (error) {
-    res.status(500).json({ success: false, message: (error as Error).message });
+    next(error);
   }
 };
 
@@ -26,14 +63,14 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 // GET ONE PRODUCT
 // ===========================
 
-export const getProductById = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+export const getProductById = async (req: Request<{ id: string }>, res: Response,next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
     const id = Number(req.params.id); // URL params are always strings → convert to number
     const product = await productService.getProductById(id, shop_id);
-    res.status(200).json({ success: true, data: product });
+    res.status(200).json(successResponse(product));
   } catch (error) {
-    res.status(404).json({ success: false, message: (error as Error).message });
+    next(error);
     // 404 → product not found or doesn't belong to this shop
   }
 };
@@ -42,14 +79,14 @@ export const getProductById = async (req: Request<{ id: string }>, res: Response
 // CREATE PRODUCT
 // ===========================
 
-export const createProduct = async (req: Request, res: Response): Promise<void> => {
+export const createProduct = async (req: Request, res: Response,next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
     const product = await productService.createProduct(shop_id, req.body);
-    res.status(201).json({ success: true, data: product });
+    res.status(201).json(successResponse(product));
     // 201 → something was CREATED in database
   } catch (error) {
-    res.status(500).json({ success: false, message: (error as Error).message });
+    next(error);
   }
 };
 
@@ -57,15 +94,15 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 // UPDATE PRODUCT
 // ===========================
 
-export const updateProduct = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+export const updateProduct = async (req: Request<{ id: string }>, res: Response,next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
     const id = Number(req.params.id); // convert string → number
     const product = await productService.updateProduct(id, shop_id, req.body);    
-    res.status(200).json({ success: true, data: product });
+    res.status(200).json(successResponse(product));
    
   } catch (error) {
-    res.status(404).json({ success: false, message: (error as Error).message });
+    next(error);
     // 404 → product not found or doesn't belong to this shop
   }
 };
@@ -74,14 +111,13 @@ export const updateProduct = async (req: Request<{ id: string }>, res: Response)
 // DELETE PRODUCT
 // ===========================
 
-export const deleteProduct = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+export const deleteProduct = async (req: Request<{ id: string }>, res: Response,next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
     const id = Number(req.params.id); // convert string → number
     const result = await productService.deleteProduct(id, shop_id);
-    res.status(200).json({ success: true, data: result });
-  } catch (error) {
-    res.status(404).json({ success: false, message: (error as Error).message });
+    res.status(200).json(successResponse(result));
+  } catch (error) { next(error);
     // 404 → product not found or doesn't belong to this shop
   }
 };
