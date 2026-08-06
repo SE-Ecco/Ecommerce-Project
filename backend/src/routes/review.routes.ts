@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
-import { validateRequest } from '../middleware/validate.middleware';
+import { validateMiddleware } from '../middleware/validate.middleware';
 import { createReviewValidation } from '../validations/review.validation';
 import * as reviewController from '../controllers/review.controller';
 
@@ -10,8 +10,8 @@ router.get('/product/:id', reviewController.getReviews);
 router.post(
     '/',
     authenticate,
-    createReviewValidation,  // 🔧 Fix 3: validation added
-    validateRequest,
+    createReviewValidation,  // 🔧 Fix 3: validation added --> fixed naming mismatch 'typo'.
+    validateMiddleware,
     reviewController.createReview
 );
 
