@@ -8,12 +8,13 @@
 //   PUT    /api/products/:id            → [auth, authorize('shop_admin'), attachShopId]         → updateProduct()
 //   DELETE /api/products/:id            → [auth, authorize('shop_admin'), attachShopId]         → deleteProduct()
 import { Router } from 'express'
-import { getProducts, getProductById, createProduct, updateProduct, deleteProduct } from '../controllers/product.controller'
+import { getProducts, getProductById, createProduct, updateProduct, deleteProduct,getVariants, createVariant, updateVariant, deleteVariant } from '../controllers/product.controller'
 import { authenticate  } from '../middleware/auth.middleware'
 import { shopMiddleware } from '../middleware/shop.middleware'
 import { validateMiddleware } from '../middleware/validate.middleware'
-import { createProductValidation, updateProductValidation } from '../validations/product.validation'
+import { createProductValidation, updateProductValidation,createVariantValidation, updateVariantValidation  } from '../validations/product.validation'
 import { upload } from '../middleware/upload.middleware'
+
 const router = Router()
 
 router.post('/', authenticate, shopMiddleware, upload('products').single('image'), createProductValidation, validateMiddleware, createProduct)
@@ -21,7 +22,10 @@ router.put('/:id', authenticate, shopMiddleware, upload('products').single('imag
 router.get('/', authenticate, shopMiddleware , getProducts)
 router.get('/:id', authenticate, shopMiddleware , getProductById)
 router.delete('/:id', authenticate, shopMiddleware, deleteProduct)
-
+router.get('/:id/variants', authenticate, shopMiddleware, getVariants)
+router.post('/:id/variants', authenticate, shopMiddleware, createVariantValidation, validateMiddleware, createVariant)
+router.put('/:id/variants/:variantId', authenticate, shopMiddleware, updateVariantValidation, validateMiddleware, updateVariant)
+router.delete('/:id/variants/:variantId', authenticate, shopMiddleware, deleteVariant)
 export default router
 
 

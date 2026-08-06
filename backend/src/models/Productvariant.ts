@@ -20,20 +20,21 @@ import sequelize from '../config/database';    // our database connection instan
 // ProductVariant class = blueprint of the product_variants table
 // each instance = one variation of the same product (size L red, size M blue, etc.)
 class ProductVariant extends Model {
-  declare id: number;              // primary key — auto generated
+  declare id: number;               // primary key — auto generated
+  declare shop_id: number;             
   declare product_id: number;      // which product this variant belongs to
   declare name: string;            // variant display name → "Size L - Red"
   declare sku: string | null;      // stock keeping unit → "SHIRT-L-RED-001"
-                                   // used for inventory tracking, must be unique
+  // used for inventory tracking, must be unique
   declare price: number | null;    // price override for this variant
-                                   // NULL = use the parent product's price
-                                   // has value = this variant has different price
+  // NULL = use the parent product's price
+  // has value = this variant has different price
   declare stock: number;           // how many units of THIS variant are available
   declare attributes: object | null; // JSONB variant properties
-                                     // {"size": "L", "color": "red", "material": "cotton"}
+  // {"size": "L", "color": "red", "material": "cotton"}
   declare is_active: boolean;      // true = visible | false = hidden by vendor
   declare deleted_at: Date | null; // soft delete: NULL = exists | date = deleted
-                                   // same pattern as products table for consistency
+  // same pattern as products table for consistency
 }
 
 // ProductVariant.init() = tell Sequelize exact columns + rules for this table
@@ -43,6 +44,10 @@ ProductVariant.init(
       type: DataTypes.INTEGER,     // whole number
       primaryKey: true,            // unique identifier for each variant
       autoIncrement: true,         // database auto-generates: 1, 2, 3...
+    },
+    shop_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     product_id: {
       type: DataTypes.INTEGER,     // whole number — references products.id
@@ -60,7 +65,7 @@ ProductVariant.init(
     price: {
       type: DataTypes.DECIMAL(10, 2), // 10 digits, 2 after decimal
       allowNull: true,             // NULL = use parent product price
-                                   // value = this variant costs differently
+      // value = this variant costs differently
     },
     stock: {
       type: DataTypes.INTEGER,     // whole number — variant-specific stock
@@ -78,8 +83,8 @@ ProductVariant.init(
     deleted_at: {
       type: DataTypes.DATE,        // timestamp of when variant was "deleted"
       allowNull: true,             // NULL = variant exists
-                                   // has value = variant soft deleted
-                                   // ALWAYS filter: WHERE deleted_at IS NULL
+      // has value = variant soft deleted
+      // ALWAYS filter: WHERE deleted_at IS NULL
     },
   },
   {
