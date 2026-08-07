@@ -5,6 +5,7 @@
 
 import Product from '../models/Product';   // Sequelize model — talks to products table
 import Category from '../models/Category'; // needed for product queries with category info
+import ProductVariant from '../models/Productvariant';
 
 // ===========================
 // GET ALL PRODUCTS
@@ -14,7 +15,7 @@ export const getProducts = async (shop_id: number) => {
   // findAll with shop_id filter → only returns THIS shop's products
   // never returns other shops products 🔒
   return await Product.findAll({
-    where: { shop_id }, // shorthand for { shop_id: shop_id }
+    where: { shop_id, deleted_at: null }, // shorthand for { shop_id: shop_id }
   });
 };
 
@@ -26,7 +27,7 @@ export const getProductById = async (id: number, shop_id: number) => {
   // findOne with BOTH id AND shop_id → double security check
   // even if hacker knows product id → shop_id filter blocks them 🔒
   const product = await Product.findOne({
-    where: { id, shop_id },
+    where: { id, shop_id, deleted_at: null  },
   });
 
   if (!product) throw new Error('Product not found');
@@ -48,7 +49,6 @@ export const createProduct = async (
     stock: number;
     description?: string;  // optional
     category_id?: number;  // optional
-    image_url?: string;    // optional — added after Cloudinary upload
   }
 ) => {
   // spread operator → { shop_id, name, price, stock, ... }
@@ -84,10 +84,51 @@ export const deleteProduct = async (id: number, shop_id: number) => {
   const product = await getProductById(id, shop_id);
 
   // destroy() → DELETE FROM products WHERE id = ?
-  await product.destroy();
+  await product.update({ deleted_at: new Date() }); // soft delete 🔧
 
   return { message: 'Product deleted successfully' };
 };
+
+export const getVariantsByProduct = async (product_id: number, shop_id: number) => {
+  return await ProductVariant.findAll({
+    where: { product_id, shop_id, deleted_at: null },
+  });
+};
+
+export const createVariant = async (
+  product_id: number,
+  shop_id: number,
+  data: {
+    name: string;
+    sku?: string;
+    price?: number;
+    stock?: number;
+    attributes?: object;
+  }
+) => {
+  await getProductById(product_id, shop_id);
+  return await ProductVariant.create({ product_id, shop_id, ...data });
+};
+
+export const updateVariant = async (id: number, shop_id: number, data: object) => {
+  const variant = await ProductVariant.findOne({
+  where: { id, shop_id, deleted_at: null }  });
+  if (!variant) throw new Error('Variant not found');
+  await variant.update(data);
+  return variant;
+};
+
+export const deleteVariant = async (id: number, shop_id: number) => {
+  const variant = await ProductVariant.findOne({
+  where: { id, shop_id, deleted_at: null }  });
+  if (!variant) throw new Error('Variant not found');
+  await variant.update({ deleted_at: new Date() });
+  return { message: 'Variant deleted successfully' };
+};
+
+
+
+
 
 /*
   HOW THIS FILE CONNECTS:

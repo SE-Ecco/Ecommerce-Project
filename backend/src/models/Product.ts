@@ -44,14 +44,14 @@ class Product extends Model {
   declare name: string;            // product name → "Olive Oil 1L"
   declare description: string | null; // optional product description
   declare price: number;           // base price in IQD → 15000.00
-                                   // ALWAYS use DECIMAL — never FLOAT for money!
+  // ALWAYS use DECIMAL — never FLOAT for money!
   declare stock: number;           // how many units available right now
   declare is_active: boolean;      // true = visible | false = hidden by vendor
   declare deleted_at: Date | null; // soft delete: NULL = exists | date = deleted
-                                   // we never hard delete products (keeps order history!)
+  // we never hard delete products (keeps order history!)
   declare attributes: object | null; // JSONB flexible data
-                                     // food: {"weight": "500g", "expiry": "2025-12"}
-                                     // electronics: {"warranty": "1 year"}
+  // food: {"weight": "500g", "expiry": "2025-12"}
+  // electronics: {"warranty": "1 year"}
 }
 
 // Product.init() = tell Sequelize exact columns + rules for this table
@@ -94,8 +94,8 @@ Product.init(
     deleted_at: {
       type: DataTypes.DATE,        // timestamp of when product was "deleted"
       allowNull: true,             // NULL = product exists and is real
-                                   // has value = product was soft deleted
-                                   // ALWAYS filter: WHERE deleted_at IS NULL
+      // has value = product was soft deleted
+      // ALWAYS filter: WHERE deleted_at IS NULL
     },
     attributes: {
       type: DataTypes.JSONB,       // flexible JSON stored in PostgreSQL
