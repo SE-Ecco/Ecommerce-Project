@@ -16,7 +16,7 @@ export const getReviews = async (
         const reviews = await reviewService.getReviewsByProduct(productId);
         res.status(200).json(successResponse(reviews));
     } catch (error) {
-        next(error); // 🔧 Fix: use error middleware
+        next(error);
     }
 };
 
@@ -27,7 +27,7 @@ export const createReview = async (
 ) => {
     try {
         const userId = req.user?.id;
-        const { productId, orderId, rating, comment } = req.body; // 🔧 shopId removed
+        const { productId, rating, comment } = req.body; // 🔧 orderId removed
 
         if (!userId) {
             res.status(401).json(errorResponse('User not authenticated'));
@@ -37,12 +37,11 @@ export const createReview = async (
         const review = await reviewService.createReview(
             userId,
             productId,
-            orderId,
             rating,
             comment ?? null
         );
         res.status(201).json(successResponse(review));
     } catch (error) {
-        next(error); // 🔧 Fix: use error middleware
+        next(error);
     }
 };
