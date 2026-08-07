@@ -10,7 +10,7 @@ router.get('/product/:id', reviewController.getReviews);
 router.post(
     '/',
     authenticate,
-    createReviewValidation,  // 🔧 Fix 3: validation added
+    createReviewValidation,
     validateMiddleware,
     reviewController.createReview
 );
