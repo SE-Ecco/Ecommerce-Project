@@ -8,15 +8,21 @@
 //   PUT    /api/products/:id            → [auth, authorize('shop_admin'), attachShopId]         → updateProduct()
 //   DELETE /api/products/:id            → [auth, authorize('shop_admin'), attachShopId]         → deleteProduct()
 import { Router } from 'express'
-import { getProducts, getProductById, createProduct, updateProduct, deleteProduct,getVariants, createVariant, updateVariant, deleteVariant } from '../controllers/product.controller'
 import { authenticate  } from '../middleware/auth.middleware'
 import { shopMiddleware } from '../middleware/shop.middleware'
 import { validateMiddleware } from '../middleware/validate.middleware'
 import { createProductValidation, updateProductValidation,createVariantValidation, updateVariantValidation  } from '../validations/product.validation'
 import { upload } from '../middleware/upload.middleware'
 
+import {getProducts, getProductById, createProduct, updateProduct, deleteProduct,getVariants, createVariant, updateVariant, deleteVariant,getProductImages, addProductImage,setPrimaryImage, deleteProductImage } from '../controllers/product.controller'
+
+// add routes
 const router = Router()
 
+router.get('/:id/images', authenticate, shopMiddleware, getProductImages)
+router.post('/:id/images', authenticate, shopMiddleware, upload('products').single('image'), addProductImage)
+router.patch('/:id/images/:imageId/primary', authenticate, shopMiddleware, setPrimaryImage)
+router.delete('/:id/images/:imageId', authenticate, shopMiddleware, deleteProductImage)
 router.post('/', authenticate, shopMiddleware, upload('products').single('image'), createProductValidation, validateMiddleware, createProduct)
 router.put('/:id', authenticate, shopMiddleware, upload('products').single('image'), updateProductValidation, validateMiddleware, updateProduct)
 router.get('/', authenticate, shopMiddleware , getProducts)

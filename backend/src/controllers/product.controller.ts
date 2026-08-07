@@ -7,8 +7,9 @@
 import { Request, Response, NextFunction  } from 'express';
 import * as productService from '../services/product.service';
 import { successResponse } from '../utils/response';
-
-
+import ProductImage from '../models/Productimage';
+import cloudinary from '../config/cloudinary';
+import 'multer'; // makes Express.Multer.File type available
 export const getVariants = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
@@ -121,6 +122,63 @@ export const deleteProduct = async (req: Request<{ id: string }>, res: Response,
     // 404 → product not found or doesn't belong to this shop
   }
 };
+
+export const getProductImages = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const shop_id = req.user!.shop_id as number;
+    const product_id = Number(req.params.id);
+    const images = await productService.getProductImages(product_id, shop_id);
+    res.status(200).json(successResponse(images));
+  } catch (error) { next(error); }
+};
+
+export const addProductImage = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const shop_id = req.user!.shop_id as number;
+    const product_id = Number(req.params.id);
+    const is_primary = req.body.is_primary === 'true'; // multer sends strings!
+    const image = await productService.addProductImage(
+      product_id,
+      shop_id,
+      req.file as { path: string; filename: string },     // hint: where does multer put the uploaded file?
+      is_primary
+    );
+    res.status(201).json(successResponse(image));
+  } catch (error) { next(error); }
+};
+
+export const setPrimaryImage = async (
+  req: Request<{ id: string; imageId: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const shop_id = req.user!.shop_id as number;
+    const product_id = Number(req.params.id);
+    const id = Number(req.params.imageId);
+    await productService.setPrimaryImage(id, product_id, shop_id);
+    res.status(200).json(successResponse({ message: 'Primary image updated successfully' }));
+  } catch (error) { next(error); }
+};
+
+export const deleteProductImage = async (
+  req: Request<{ id: string; imageId: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const shop_id = req.user!.shop_id as number;
+    const id = Number(req.params.imageId);
+    const result = await productService.deleteProductImage(id, shop_id);
+    res.status(200).json(successResponse(result));
+  } catch (error) { next(error); }
+};
+
+
 
 /*
   HOW THIS FILE CONNECTS:

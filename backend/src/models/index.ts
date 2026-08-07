@@ -129,6 +129,7 @@ shop.hasMany(ProductVariant, {
   as: 'product_variants',
 });
 shop.hasMany(Address, { foreignKey: 'shop_id', as: 'addresses' });
+shop.hasMany(ProductImage, { foreignKey: 'shop_id', as: 'product_images' });
 
 // ─────────────────────────────────────────────────────────────
 // USER associations
@@ -256,7 +257,7 @@ ProductImage.belongsTo(Product, {
   foreignKey: 'product_id',
   as: 'product',
 });
-
+ProductImage.belongsTo(shop, { foreignKey: 'shop_id', as: 'shop' });
 // ─────────────────────────────────────────────────────────────
 // PRODUCT VARIANT associations
 // variants = size/color/weight variations of the same product

@@ -6,7 +6,9 @@
 import Product from '../models/Product';   // Sequelize model — talks to products table
 import Category from '../models/Category'; // needed for product queries with category info
 import ProductVariant from '../models/Productvariant';
-
+import ProductImage from '../models/Productimage';
+import cloudinary from '../config/cloudinary';
+import 'multer'; // makes Express.Multer.File type available
 // ===========================
 // GET ALL PRODUCTS
 // ===========================
@@ -27,7 +29,7 @@ export const getProductById = async (id: number, shop_id: number) => {
   // findOne with BOTH id AND shop_id → double security check
   // even if hacker knows product id → shop_id filter blocks them 🔒
   const product = await Product.findOne({
-    where: { id, shop_id, deleted_at: null  },
+    where: { id, shop_id, deleted_at: null },
   });
 
   if (!product) throw new Error('Product not found');
@@ -94,6 +96,9 @@ export const getVariantsByProduct = async (product_id: number, shop_id: number) 
     where: { product_id, shop_id, deleted_at: null },
   });
 };
+// ===========================
+// PRODUCT VARIANT 
+// ===========================
 
 export const createVariant = async (
   product_id: number,
@@ -112,7 +117,8 @@ export const createVariant = async (
 
 export const updateVariant = async (id: number, shop_id: number, data: object) => {
   const variant = await ProductVariant.findOne({
-  where: { id, shop_id, deleted_at: null }  });
+    where: { id, shop_id, deleted_at: null }
+  });
   if (!variant) throw new Error('Variant not found');
   await variant.update(data);
   return variant;
@@ -120,11 +126,78 @@ export const updateVariant = async (id: number, shop_id: number, data: object) =
 
 export const deleteVariant = async (id: number, shop_id: number) => {
   const variant = await ProductVariant.findOne({
-  where: { id, shop_id, deleted_at: null }  });
+    where: { id, shop_id, deleted_at: null }
+  });
   if (!variant) throw new Error('Variant not found');
   await variant.update({ deleted_at: new Date() });
   return { message: 'Variant deleted successfully' };
 };
+
+
+// ===========================
+// PRODUCT IMAGES
+// ===========================
+
+
+// GET ALL IMAGES FOR A PRODUCT
+export const getProductImages = async (product_id: number, shop_id: number) => {
+  return await ProductImage.findAll({
+    where: { product_id, shop_id },
+    order: [['sort_order', 'ASC']] // first image first
+  });
+};
+
+// ADD IMAGE
+export const addProductImage = async (
+  product_id: number,
+  shop_id: number,
+  file: { path: string; filename: string },
+  is_primary: boolean = false
+) => {
+  await getProductById(product_id, shop_id); // verify ownership 🔒
+  return await ProductImage.create({
+    product_id,
+    shop_id,
+    cloudinary_url: file.path,
+    cloudinary_public_id: file.filename,
+    is_primary,
+  });
+};
+
+// SET PRIMARY IMAGE
+export const setPrimaryImage = async (id: number, product_id: number, shop_id: number) => {
+  await getProductById(product_id, shop_id); // verify ownership 🔒
+  await ProductImage.update(
+    { is_primary: false  },             // reset ALL images
+    { where: { product_id, shop_id } }
+  );
+  await ProductImage.update(
+    { is_primary: true },             // set THIS one as primary
+    { where: { id, product_id, shop_id } }
+  );
+};
+
+// DELETE IMAGE
+export const deleteProductImage = async (id: number, shop_id: number) => {
+  const image = await ProductImage.findOne({
+    where: { id, shop_id }
+  });
+  if (!image) throw new Error('Image not found');
+  await cloudinary.uploader.destroy(image.cloudinary_public_id); // delete from Cloudinary first!
+  await image.destroy();                             // then delete from DB
+  return { message: 'Image deleted successfully' };
+};
+
+
+
+
+
+
+
+
+
+
+
 
 
 

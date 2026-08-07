@@ -20,20 +20,21 @@ import sequelize from '../config/database';    // our database connection instan
 // ProductImage class = blueprint of the product_images table
 // each instance of ProductImage = one row = one image belonging to one product
 class ProductImage extends Model {
-  declare id: number;                       // primary key — auto generated
+  declare id: number;  // primary key — auto generated     
+  declare shop_id: number;
   declare product_id: number;               // which product this image belongs to
   declare cloudinary_url: string;           // full secure URL → "https://res.cloudinary.com/..."
-                                            // used directly in <img src="..." /> tag
+  // used directly in <img src="..." /> tag
   declare cloudinary_public_id: string;     // CRITICAL! → "duhok/products/olive-oil-abc123"
-                                            // needed to DELETE this image from Cloudinary
-                                            // secure_url can change — public_id NEVER changes!
+  // needed to DELETE this image from Cloudinary
+  // secure_url can change — public_id NEVER changes!
   declare cloudinary_format: string | null; // image format → "jpg", "png", "webp"
   declare cloudinary_width: number | null;  // width in pixels → 800
   declare cloudinary_height: number | null; // height in pixels → 600
   declare is_primary: boolean;              // true = main thumbnail shown in product listings
-                                            // false = extra gallery image
+  // false = extra gallery image
   declare sort_order: number;               // 0 = first, 1 = second, etc.
-                                            // controls gallery display order
+  // controls gallery display order
 }
 
 // ProductImage.init() = tell Sequelize exact columns + rules for this table
@@ -43,6 +44,10 @@ ProductImage.init(
       type: DataTypes.INTEGER,   // whole number
       primaryKey: true,          // unique identifier for each image
       autoIncrement: true,       // database auto-generates: 1, 2, 3...
+    },
+    shop_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     product_id: {
       type: DataTypes.INTEGER,   // whole number — references products.id
@@ -82,8 +87,8 @@ ProductImage.init(
     sequelize,                  // which database connection to use
     modelName: 'ProductImage',  // Sequelize internal model name
     tableName: 'product_images',// exact PostgreSQL table name
-    timestamps: false,          // only created_at needed — images don't update
-    underscored: true,          // converts camelCase to snake_case in DB
+    timestamps: true,           // adds created_at + updated_at ✅
+    underscored: true               // converts camelCase to snake_case in DB
   }
 );
 
