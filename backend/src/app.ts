@@ -29,7 +29,7 @@ app.use('/api/shops', shops);                                  // routes added h
 app.use('/api/products', products);
 app.use('/api/categories', categories);
 app.use('/api/orders', orders);
-app.use('/api/auth', admin);
+app.use('/api/admin', admin);
 app.use('/api/cart', cartRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/notifications', notificationRoutes);
