@@ -14,11 +14,12 @@ import { validateMiddleware } from '../middleware/validate.middleware'
 import { createProductValidation, updateProductValidation,createVariantValidation, updateVariantValidation  } from '../validations/product.validation'
 import { upload } from '../middleware/upload.middleware'
 
-import {getProducts, getProductById, createProduct, updateProduct, deleteProduct,getVariants, createVariant, updateVariant, deleteVariant,getProductImages, addProductImage,setPrimaryImage, deleteProductImage } from '../controllers/product.controller'
+import {logSearch,logProductView,getProducts, getProductById, createProduct, updateProduct, deleteProduct,getVariants, createVariant, updateVariant, deleteVariant,getProductImages, addProductImage,setPrimaryImage, deleteProductImage } from '../controllers/product.controller'
 
 // add routes
 const router = Router()
-
+router.post('/:id/views', authenticate, shopMiddleware, logProductView)
+router.post('/search-log', authenticate, shopMiddleware, logSearch)
 router.get('/:id/images', authenticate, shopMiddleware, getProductImages)
 router.post('/:id/images', authenticate, shopMiddleware, upload('products').single('image'), addProductImage)
 router.patch('/:id/images/:imageId/primary', authenticate, shopMiddleware, setPrimaryImage)
