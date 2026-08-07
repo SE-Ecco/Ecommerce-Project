@@ -1,10 +1,9 @@
-import Review from '../models/Review';
+import Review from '../models/Productreview';
 import Product from '../models/Product';
 
 export const createReview = async (
     userId: number,
     productId: number,
-    orderId: number,       // 🔧 Fix 2: shopId removed
     rating: number,
     comment: string | null
 ) => {
@@ -15,7 +14,6 @@ export const createReview = async (
         user_id: userId,
         product_id: productId,
         shop_id: product.shop_id,  // 🔧 derived safely from product
-        order_id: orderId,
         rating,
         comment
     });
