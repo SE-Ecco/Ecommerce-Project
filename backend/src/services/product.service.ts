@@ -198,24 +198,19 @@ export const deleteProductImage = async (id: number, shop_id: number) => {
   ==========================
 */
 
+
 export const addTagsToProduct = async(
   productId: number,
   shopId: number,
   tagNames: string[]
 ) => {
+  await getProductById(productId, shopId); // 🔧 ownership check
   for(const name of tagNames){
     let tag = await Tag.findOne({
-      where: {
-        shop_id: shopId,
-        name: name
-      }
+      where: { shop_id: shopId, name: name }
     });
-
     if (!tag){
-      tag = await Tag.create({
-        shop_id: shopId,
-        name: name
-      });
+      tag = await Tag.create({ shop_id: shopId, name: name });
     }
     await ProductTag.create({
       product_id: productId,
@@ -274,19 +269,18 @@ export const createFlashSale = async (
     });
 };
 
-export const getActiveFlashSale = async (productId: number) => {
+export const getActiveFlashSale = async (productId: number, shop_id: number) => {
     const now = new Date();
-
     return await FlashSale.findOne({
         where: {
             product_id: productId,
+            shop_id, // 🔧 shop_id added
             is_active: true,
-            starts_at: { [Op.lte]: now },   // sale already started (starts_at ≤ now)
-            ends_at: { [Op.gte]: now }      // sale hasn't ended yet (now ≤ ends_at)
+            starts_at: { [Op.lte]: now },
+            ends_at: { [Op.gte]: now }
         }
     });
 };
-
 
 
 
