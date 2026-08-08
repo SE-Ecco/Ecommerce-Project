@@ -259,7 +259,8 @@ export const getActiveFlashSaleHandler = async (
 ): Promise<void> => {
     try {
         const productId = Number(req.params.id);
-        const flashSale = await productService.getActiveFlashSale(productId);
+        const shop_id = req.user!.shop_id as number; // 🔧 added
+        const flashSale = await productService.getActiveFlashSale(productId, shop_id); // 🔧 pass shop_id
         res.status(200).json(successResponse(flashSale));
     } catch (error) {
         next(error);
