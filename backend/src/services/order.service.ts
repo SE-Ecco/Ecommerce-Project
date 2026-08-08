@@ -5,6 +5,7 @@
 import { Order, OrderItem } from '../models/Order-OrderItem';
 import Product from '../models/Product';
 import sequelize from '../config/database';
+import  PaymentTransaction  from '../models/Paymenttransaction';
 
 // ── PLACE ORDER ──────────────────────────────────────────────
 export const placeOrder = async (
@@ -128,4 +129,49 @@ export const updateStatus = async (
     await order.save();
 
     return order;
+};
+
+
+/*
+    ====================
+    Payment transaction
+    ====================
+*/
+
+export const createPaymentTransaction = async (
+    orderId: number,
+    shopId: number,
+    amount: number,
+    paymentMethod: string
+) => {
+    return await PaymentTransaction.create({
+        order_id: orderId,
+        shop_id: shopId,
+        amount,
+        payment_method: paymentMethod
+        // status left out on purpose → defaults to 'pending' (single source of truth ✅)
+    });
+};
+
+export const updatePaymentStatus = async (
+    transactionId: number,
+    shopId: number,
+    status: 'completed' | 'failed' | 'refunded',
+    transactionRef: string | null
+) => {
+    // 1. find the transaction — must belong to THIS shop 🔒
+    const transaction = await PaymentTransaction.findOne({
+        where: { id: transactionId, shop_id: shopId }
+    });
+
+    // 2. not found or wrong shop → throw
+    if (!transaction) throw new Error('Payment transaction not found');
+
+    // 3. update status + reference
+    transaction.status = status;
+    transaction.transaction_ref = transactionRef;
+    await transaction.save();
+
+    // 4. return updated transaction
+    return transaction;
 };

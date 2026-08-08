@@ -11,10 +11,33 @@ import { Router } from 'express'
 import { authenticate  } from '../middleware/auth.middleware'
 import { shopMiddleware } from '../middleware/shop.middleware'
 import { validateMiddleware } from '../middleware/validate.middleware'
-import { createProductValidation, updateProductValidation,createVariantValidation, updateVariantValidation  } from '../validations/product.validation'
+import { 
+            createProductValidation,
+            updateProductValidation,
+            createVariantValidation,
+            updateVariantValidation,
+            addTagsValidation,
+            createFlashSaleValidation,} from '../validations/product.validation'
 import { upload } from '../middleware/upload.middleware'
 
-import {getProducts, getProductById, createProduct, updateProduct, deleteProduct,getVariants, createVariant, updateVariant, deleteVariant,getProductImages, addProductImage,setPrimaryImage, deleteProductImage } from '../controllers/product.controller'
+import {
+            getProducts,
+            getProductById,
+            createProduct,
+            updateProduct,
+            deleteProduct,
+            getVariants, 
+            createVariant, 
+            updateVariant, 
+            deleteVariant,
+            getProductImages, 
+            addProductImage,
+            setPrimaryImage,
+            deleteProductImage,
+            addTags,
+            getProductsByTagHandler,
+            createFlashSaleHandler,
+            getActiveFlashSaleHandler } from '../controllers/product.controller'
 
 // add routes
 const router = Router()
@@ -26,10 +49,14 @@ router.delete('/:id/images/:imageId', authenticate, shopMiddleware, deleteProduc
 router.post('/', authenticate, shopMiddleware, upload('products').single('image'), createProductValidation, validateMiddleware, createProduct)
 router.put('/:id', authenticate, shopMiddleware, upload('products').single('image'), updateProductValidation, validateMiddleware, updateProduct)
 router.get('/', authenticate, shopMiddleware , getProducts)
+router.get('/tags/:tagName', authenticate, shopMiddleware, getProductsByTagHandler)
 router.get('/:id', authenticate, shopMiddleware , getProductById)
+router.get('/:id/flash-sale', authenticate, shopMiddleware, getActiveFlashSaleHandler)
 router.delete('/:id', authenticate, shopMiddleware, deleteProduct)
 router.get('/:id/variants', authenticate, shopMiddleware, getVariants)
+router.post('/:id/flash-sale', authenticate, shopMiddleware, createFlashSaleValidation, validateMiddleware, createFlashSaleHandler)
 router.post('/:id/variants', authenticate, shopMiddleware, createVariantValidation, validateMiddleware, createVariant)
+router.post('/:id/tags', authenticate, shopMiddleware, addTagsValidation, validateMiddleware, addTags)
 router.put('/:id/variants/:variantId', authenticate, shopMiddleware, updateVariantValidation, validateMiddleware, updateVariant)
 router.delete('/:id/variants/:variantId', authenticate, shopMiddleware, deleteVariant)
 export default router

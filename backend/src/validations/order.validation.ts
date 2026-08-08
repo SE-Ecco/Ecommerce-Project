@@ -62,6 +62,30 @@ export const updateStatusValidation = [
     ]).withMessage('Invalid status value.'),
 ];
 
+/*
+    ===========================
+    payment transaction
+    =========================== 
+*/
+
+export const createPaymentTransactionValidation = [
+    body('amount')
+        .isFloat({ min: 0.01 }).withMessage('Amount must be greater than 0'),
+    body('paymentMethod')
+        .notEmpty().withMessage('Payment method is required')
+        .isString(),
+];
+
+export const updatePaymentStatusValidation = [
+    body('status')
+        .isIn(['completed', 'failed', 'refunded'])
+        .withMessage('Status must be completed, failed, or refunded'),
+    body('transactionRef')
+        .optional()
+        .isString(),
+];
+
+
 // ── 🍽️ THE STORY (for teaching the team) ──────────────────
 // order.validation.ts = the BOUNCER at the restaurant door 🚪
 // checks the customer's order form BEFORE it even reaches the cashier (controller)

@@ -7,9 +7,10 @@
 // USED BY: routes/order.routes.ts
 // HANDLES: POST place order, GET my orders, GET shop orders, PATCH update status
 
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as orderService from '../services/order.service';
 import { successResponse, errorResponse } from '../utils/response';
+
 
 // ── PLACE ORDER ──────────────────────────────────────────────
 // POST /api/orders
@@ -94,6 +95,54 @@ export const updateStatus = async (req: Request<{ id: string }>, res: Response):
         res.status(404).json(errorResponse((error as Error).message));
     }
 };
+
+
+// Payment transaction
+
+export const createPaymentTransactionHandler = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const orderId = Number(req.params.id);
+        const shop_id = req.user!.shop_id as number;
+        const { amount, paymentMethod } = req.body;
+
+        const transaction = await orderService.createPaymentTransaction(
+            orderId,
+            shop_id,
+            amount,
+            paymentMethod
+        );
+        res.status(201).json(successResponse(transaction));
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updatePaymentStatusHandler = async (
+    req: Request<{ transactionId: string }>,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const transactionId = Number(req.params.transactionId);
+        const shop_id = req.user!.shop_id as number;
+        const { status, transactionRef } = req.body;
+
+        const transaction = await orderService.updatePaymentStatus(
+            transactionId,
+            shop_id,
+            status,
+            transactionRef ?? null
+        );
+        res.status(200).json(successResponse(transaction));
+    } catch (error) {
+        next(error);
+    }
+};
+
 // ── 🍽️ THE STORY ─────────────────────────────────────────
 // order.controller.ts = the CASHIER 💼
 // customer/owner tells the cashier what they want (req)
@@ -103,3 +152,5 @@ export const updateStatus = async (req: Request<{ id: string }>, res: Response):
 // cashier wraps the plate in the SAME standard box every time (successResponse)
 // if the chef drops the pan → cashier just calls the manager (next(error)),
 //   doesn't try to clean it up themselves
+
+
