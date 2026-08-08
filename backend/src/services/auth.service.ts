@@ -33,10 +33,10 @@ export const register = async (
 
   // 3. create new user in database with hashed password
   const newUser = await User.create({
-    full_name,              // shorthand for full_name: full_name
-    email,                  // shorthand for email: email
-    password: hashedPassword, // store HASH not plain password! 🔒
-    role: 'customer',       // HARDCODED — nobody self-promotes to admin! security rule ✅
+    name: full_name,               // 🔧 fix: model uses 'name' not 'full_name'
+    email,                         // shorthand for email: email
+    password_hash: hashedPassword, // 🔧 fix: model uses 'password_hash' not 'password'
+    role: 'customer',              // HARDCODED — nobody self-promotes to admin! security rule ✅
   });
   // User.create() → INSERT INTO users (...) VALUES (...) → returns created user row
 
@@ -52,9 +52,9 @@ export const register = async (
   const token = generateToken(payload); // jwt.sign(payload, secret, { expiresIn: '7d' })
   // token = long string like "eyJhbGciOiJIUzI1NiJ9.abc123..."
 
- const { password: _, ...safeUser } = newUser.toJSON();
-return { user: safeUser, token };
- // sent back to controller → controller sends to client
+  const { password_hash: _, ...safeUser } = newUser.toJSON(); // 🔧 fix: strip password_hash not password
+  return { user: safeUser, token };
+  // sent back to controller → controller sends to client
 };
 
 // ===========================
@@ -89,7 +89,7 @@ export const login = async (
   };
 
   const token = generateToken(payload); // create token with 7 day expiry
-  const { password: _, ...safeUser } = user.toJSON();
+  const { password_hash: _, ...safeUser } = user.toJSON(); // 🔧 fix: strip password_hash
   return { user: safeUser, token }; // sent back to controller → controller sends to client
 };
 
@@ -105,7 +105,7 @@ export const getMe = async (id: number) => {
 
   if (!user) throw new Error('User not found');
   // shouldn't happen (token is valid = user exists) but safety check ✅
-  const { password: _, ...safeUser } = user.toJSON();
+  const { password_hash: _, ...safeUser } = user.toJSON(); // 🔧 fix: strip password_hash
   return safeUser; // sent back to controller
 };
 
@@ -143,8 +143,8 @@ export const getMe = async (id: number) => {
         ↓
   hashPassword("mypass123") → "$2b$12$x8Kq2..." ✅
         ↓
-  User.create({ full_name: "Alan", email: "alan@gmail.com",
-                password: "$2b$12$...", role: "customer" }) ✅
+  User.create({ name: "Alan", email: "alan@gmail.com",
+                password_hash: "$2b$12$...", role: "customer" }) ✅
         ↓
   generateToken({ id: 1, email: "alan@gmail.com",
                   role: "customer", shop_id: undefined }) ✅

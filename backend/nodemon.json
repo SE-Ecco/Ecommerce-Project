@@ -1,5 +1,7 @@
+
 {
-  "watch": ["src"], "ext": "ts,json",
+  "watch": ["src"],
+  "ext": "ts,json",
   "ignore": ["dist", "**/*.test.ts"],
-  "exec": "ts-node src/server.ts"
+  "exec": "ts-node -r tsconfig-paths/register src/server.ts"
 }

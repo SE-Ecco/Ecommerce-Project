@@ -4,93 +4,56 @@
 // HANDLES: POST /api/auth/register, POST /api/auth/login, GET /api/auth/me
 // RULE: controller is THIN — receives request, calls service, sends response. nothing else!
 import { successResponse, errorResponse } from '../utils/response';
-import { Request, Response } from 'express'  // Request = req type, Response = res type
-import * as authService from '../services/auth.service' // import all service functions
+import { Request, Response, NextFunction } from 'express' // 🔧 added NextFunction
+import * as authService from '../services/auth.service'
 
 // ===========================
 // REGISTER
 // ===========================
-
 export const register = async (
-  req: Request,  // incoming HTTP request
-  res: Response  // outgoing HTTP response
-): Promise<void> => { // returns nothing — just sends response
-
+  req: Request,
+  res: Response,
+  next: NextFunction // 🔧 added
+): Promise<void> => {
   try {
     const { full_name, email, password } = req.body;
-    // destructure — pull these 3 fields out of req.body
-    // req.body = { full_name: "Alan", email: "alan@gmail.com", password: "mypass123" }
-
     const result = await authService.register(full_name, email, password);
-    // call service — service does ALL real work:
-    //   check email exists → hash password → create user → generate token
-    // await → service is async, wait for it to finish
-    // result = { user: {...}, token: "eyJhbG..." }
-
     res.status(201).json(successResponse(result));
-    // 201 = Created — something new was created in database ✅
-    // .json() → sends response as JSON to client
-
   } catch (error) {
-    // service threw an error (e.g. "Email already exists")
-    res.status(400).json(errorResponse((error as Error).message));
-    // 400 = Bad Request — client sent invalid data
-    // (error as Error).message → safely gets error message as string
+    next(error); // 🔧 fix
   }
 };
 
 // ===========================
 // LOGIN
 // ===========================
-
 export const login = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction // 🔧 added
 ): Promise<void> => {
-
   try {
     const { email, password } = req.body;
-    // pull email + password from request body
-    // req.body = { email: "alan@gmail.com", password: "mypass123" }
-
     const result = await authService.login(email, password);
-    // call service — service does ALL real work:
-    //   find user → compare password → generate token
-    // result = { user: {...}, token: "eyJhbG..." }
-
-     res.status(200).json(successResponse(result));
-    // 200 = OK — success, nothing new created
-
+    res.status(200).json(successResponse(result));
   } catch (error) {
-    // service threw error (e.g. "Invalid email or password")
-    res.status(401).json(errorResponse((error as Error).message));
-    // 401 = Unauthorized — wrong credentials 🔒
+    next(error); // 🔧 fix
   }
 };
 
 // ===========================
 // GET ME
 // ===========================
-
 export const getMe = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction // 🔧 added
 ): Promise<void> => {
-
   try {
     const result = await authService.getMe(req.user!.id);
-    // req.user!.id → id from JWT token (attached by auth.middleware)
-    // ! → tells TypeScript "I'm sure req.user exists here"
-    //      safe because authenticate() middleware runs before this
-    // call service → finds user in DB by id
-
-     res.status(200).json(successResponse(result));
-    // 200 = OK — just reading data, nothing created
-
+    res.status(200).json(successResponse(result));
   } catch (error) {
-    // service threw error (e.g. "User not found")
-    res.status(404).json(errorResponse((error as Error).message));
-    // 404 = Not Found — user doesn't exist in DB
+    next(error); // 🔧 fix
   }
 };
 
@@ -108,15 +71,11 @@ export const getMe = async (
   STATUS CODES USED:
     201 → register  (something CREATED)
     200 → login, getMe (success, nothing created)
-    400 → register error (bad request — invalid data)
-    401 → login error (unauthorized — wrong credentials)
-    404 → getMe error (not found — user doesn't exist)
 
   ERROR HANDLING:
     service throws Error("message")
-    controller catches it
-    sends error message back to client
-    client never sees a server crash! ✅
+    controller catches it → next(error)
+    error.middleware handles it → sends response to client ✅
 
   EXAMPLE — register success:
   ────────────────────────────
@@ -137,8 +96,7 @@ export const getMe = async (
         ↓
   authService.register() throws Error("Email already exists")
         ↓
-  catch fires
-  res.status(400).json({ message: "Email already exists" }) 🛑
+  next(error) → error.middleware → sends 500 to client 🛑
 
   EXAMPLE — login fail (wrong password):
   ───────────────────────────────────────
@@ -147,8 +105,7 @@ export const getMe = async (
         ↓
   authService.login() throws Error("Invalid email or password")
         ↓
-  catch fires
-  res.status(401).json({ message: "Invalid email or password" }) 🛑
+  next(error) → error.middleware → sends 500 to client 🛑
 
   EXAMPLE — getMe success:
   ─────────────────────────
