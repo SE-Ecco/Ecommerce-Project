@@ -23,7 +23,7 @@ class ShippingMethod extends Model {
   declare price: number;            // cost in IQD → 2000.00 | 0.00 = free shipping!
   declare min_days: number | null;  // minimum days → 1 (best case)
   declare max_days: number | null;  // maximum days → 3 (worst case)
-                                    // shown to customer as "1-3 business days"
+  // shown to customer as "1-3 business days"
   declare is_active: boolean;       // vendor can disable options temporarily
   declare created_at: Date;
 }
@@ -44,13 +44,14 @@ ShippingMethod.init(
     min_days: { type: DataTypes.INTEGER, allowNull: true },
     max_days: { type: DataTypes.INTEGER, allowNull: true },
     is_active: { type: DataTypes.BOOLEAN, defaultValue: true },
-   
+
   },
   {
     sequelize,
     modelName: 'ShippingMethod',
     tableName: 'shipping_methods',
-    timestamps: false,
+    timestamps: true,      // ✅
+    updatedAt: false,      // only created_at needed
     underscored: true,
   }
 );

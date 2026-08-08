@@ -59,7 +59,7 @@ import {Order,OrderItem} from './Order-OrderItem';
 import PaymentTransaction from './Paymenttransaction';
 import FlashSale        from './Flashsale';
 import ShopSettings     from './Shopsettings';
-import ShippingMethod   from './Shippingmethod ';
+import ShippingMethod   from './Shippingmethod';
 import Notification     from './Notification';
 import SearchLog        from './Searchlog'; // created by team member ✅
 
