@@ -11,7 +11,11 @@ import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
 import { shopMiddleware } from '../middleware/shop.middleware';
 import { validateMiddleware } from '../middleware/validate.middleware';
-import { placeOrderValidation, updateStatusValidation } from '../validations/order.validation';
+import { 
+        placeOrderValidation,
+        updateStatusValidation,
+        createPaymentTransactionValidation,
+        updatePaymentStatusValidation } from '../validations/order.validation';
 import * as orderController from '../controllers/order.controller';
 
 const router = Router();
@@ -20,5 +24,8 @@ router.post('/', authenticate, placeOrderValidation, validateMiddleware, orderCo
 router.get('/my-orders', authenticate, orderController.getMyOrders);
 router.get('/shop-orders', authenticate, shopMiddleware, orderController.getShopOrders);
 router.patch('/:id/status', authenticate, shopMiddleware, updateStatusValidation, validateMiddleware, orderController.updateStatus);
+
+router.post('/:id/payments', authenticate, shopMiddleware, createPaymentTransactionValidation, validateMiddleware, orderController.createPaymentTransactionHandler)
+router.patch('/payments/:transactionId', authenticate, shopMiddleware, updatePaymentStatusValidation, validateMiddleware, orderController.updatePaymentStatusHandler)
 
 export default router;

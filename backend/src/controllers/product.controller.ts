@@ -227,7 +227,94 @@ export const deleteProductImage = async (
   } catch (error) { next(error); }
 };
 
+/*
+=======================
+  Product tag
+=======================
+*/
 
+export const addTags = async(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const productId = Number(req.params.id);
+    const shop_id = req.user!.shop_id as number;
+    const { tagNames } = req.body;
+
+    const result = await productService.addTagsToProduct(
+      productId,
+      shop_id,
+      tagNames
+    );
+    res.status(201).json(successResponse(result));
+  } catch (error){
+    next (error);
+  }
+};
+
+export const getProductsByTagHandler = async (
+    req: Request<{ tagName: string }>,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const tagName = req.params.tagName;
+        const shop_id = req.user!.shop_id as number;
+        const products = await productService.getProductsByTag(
+          tagName,
+          shop_id);
+        res.status(200).json(successResponse(products));
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+/*
+  ============================
+  flash sales
+  ============================
+*/
+
+export const createFlashSaleHandler = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const productId = Number(req.params.id);
+        const shop_id = req.user!.shop_id as number;
+        const { discountPct, startsAt, endsAt } = req.body;
+
+        const flashSale = await productService.createFlashSale(
+            shop_id,
+            productId,
+            discountPct,
+            new Date(startsAt),
+            new Date(endsAt)
+        );
+        res.status(201).json(successResponse(flashSale));
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getActiveFlashSaleHandler = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const productId = Number(req.params.id);
+        const shop_id = req.user!.shop_id as number; // 🔧 added
+        const flashSale = await productService.getActiveFlashSale(productId, shop_id); // 🔧 pass shop_id
+        res.status(200).json(successResponse(flashSale));
+    } catch (error) {
+        next(error);
+    }
+};
 
 /*
   HOW THIS FILE CONNECTS:

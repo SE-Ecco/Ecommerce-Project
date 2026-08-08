@@ -110,6 +110,45 @@ export const updateVariantValidation = [
     .isInt({ min: 0 }).withMessage('Stock must be 0 or more'),
 
 ];
+
+/*
+  =============================
+  Product Tags
+  =============================
+*/
+
+export const addTagsValidation = [
+  body('tagNames')
+    .isArray({ min: 1}).withMessage('At least one tag is required'),
+  body('tagNames.*')                                                     // tagNames.* : means validate every elements in tagNames array.
+    .isString().withMessage('Each tag must be text')
+    .trim()
+    .isLength({
+      min: 1, max: 30
+    }).withMessage('Tag must be 1-30 characters'),
+];
+
+/*
+  =======================
+  flash sales
+  =======================
+*/
+
+export const createFlashSaleValidation = [
+    body('discountPct')
+        .isInt({ min: 1, max: 100 }).withMessage('Discount must be 1-100'),
+    body('startsAt')
+        .isISO8601().withMessage('startsAt must be a valid date'),
+    body('endsAt')
+        .isISO8601().withMessage('endsAt must be a valid date')
+        .custom((value, { req }) => {
+            if (new Date(value) <= new Date(req.body.startsAt)) {
+                throw new Error('endsAt must be after startsAt');
+            }
+            return true;
+        }),
+];
+
 /*
   HOW THIS FILE WORKS:
   ─────────────────────────────────────────────────────────────────

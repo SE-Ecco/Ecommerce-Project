@@ -9,6 +9,9 @@ import ProductVariant from '../models/Productvariant';
 import ProductImage from '../models/Productimage';
 import cloudinary from '../config/cloudinary';
 import 'multer'; // makes Express.Multer.File type available
+import { Tag, ProductTag} from '../models/Tag-ProductTag'
+import  FlashSale from '../models/Flashsale';
+import { Op } from 'sequelize';
 // ===========================
 // GET ALL PRODUCTS
 // ===========================
@@ -189,17 +192,95 @@ export const deleteProductImage = async (id: number, shop_id: number) => {
 };
 
 
+/*
+  ==========================
+  PRODUCT TAG
+  ==========================
+*/
 
 
+export const addTagsToProduct = async(
+  productId: number,
+  shopId: number,
+  tagNames: string[]
+) => {
+  await getProductById(productId, shopId); // 🔧 ownership check
+  for(const name of tagNames){
+    let tag = await Tag.findOne({
+      where: { shop_id: shopId, name: name }
+    });
+    if (!tag){
+      tag = await Tag.create({ shop_id: shopId, name: name });
+    }
+    await ProductTag.create({
+      product_id: productId,
+      tag_id: tag.id
+    });
+  }
+};
 
+export const getProductsByTag = async(
+  tagName: string,
+  shopId: number
+) => {
+  const tag = await Tag.findOne({
+    where: {
+      name: tagName,
+      shop_id: shopId
+    }
+  });
 
+  if (!tag) return [];
 
+  return await Product.findAll({
+    where: {
+      shop_id: shopId,
+      deleted_at: null
+    },
+    include: [{
+      model: Tag,
+      as: 'tags',
+      where: { id: tag.id },
+      through: { attributes: [] }
+    }]
+  });
+};
 
+/*
+  =========================
+  Flash sales
+  =========================
 
+*/
 
+export const createFlashSale = async (
+    shopId: number,
+    productId: number,
+    discountPct: number,
+    startsAt: Date,
+    endsAt: Date
+) => {
+    return await FlashSale.create({
+        shop_id: shopId,
+        product_id: productId,
+        discount_pct: discountPct,
+        starts_at: startsAt,
+        ends_at: endsAt
+    });
+};
 
-
-
+export const getActiveFlashSale = async (productId: number, shop_id: number) => {
+    const now = new Date();
+    return await FlashSale.findOne({
+        where: {
+            product_id: productId,
+            shop_id, // 🔧 shop_id added
+            is_active: true,
+            starts_at: { [Op.lte]: now },
+            ends_at: { [Op.gte]: now }
+        }
+    });
+};
 
 
 

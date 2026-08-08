@@ -8,34 +8,50 @@
 //   PUT    /api/products/:id            → [auth, authorize('shop_admin'), attachShopId]         → updateProduct()
 //   DELETE /api/products/:id            → [auth, authorize('shop_admin'), attachShopId]         → deleteProduct()
 import { Router } from 'express'
-import { authenticate  } from '../middleware/auth.middleware'
+import { authenticate } from '../middleware/auth.middleware'
 import { shopMiddleware } from '../middleware/shop.middleware'
 import { validateMiddleware } from '../middleware/validate.middleware'
-import { createProductValidation, updateProductValidation,createVariantValidation, updateVariantValidation  } from '../validations/product.validation'
+import {
+    createProductValidation,
+    updateProductValidation,
+    createVariantValidation,
+    updateVariantValidation,
+    addTagsValidation,
+    createFlashSaleValidation,
+} from '../validations/product.validation'
 import { upload } from '../middleware/upload.middleware'
+import {
+    getProducts, getProductById, createProduct, updateProduct, deleteProduct,
+    getVariants, createVariant, updateVariant, deleteVariant,
+    getProductImages, addProductImage, setPrimaryImage, deleteProductImage,
+    logSearch, logProductView,
+    addTags, getProductsByTagHandler,
+    createFlashSaleHandler, getActiveFlashSaleHandler
+} from '../controllers/product.controller'
 
-import {logSearch,logProductView,getProducts, getProductById, createProduct, updateProduct, deleteProduct,getVariants, createVariant, updateVariant, deleteVariant,getProductImages, addProductImage,setPrimaryImage, deleteProductImage } from '../controllers/product.controller'
-
-// add routes
 const router = Router()
+
 router.post('/:id/views', authenticate, shopMiddleware, logProductView)
 router.post('/search-log', authenticate, shopMiddleware, logSearch)
+router.get('/', authenticate, shopMiddleware, getProducts)
+router.get('/tags/:tagName', authenticate, shopMiddleware, getProductsByTagHandler)
+router.get('/:id', authenticate, shopMiddleware, getProductById)
+router.get('/:id/flash-sale', authenticate, shopMiddleware, getActiveFlashSaleHandler)
 router.get('/:id/images', authenticate, shopMiddleware, getProductImages)
-router.post('/:id/images', authenticate, shopMiddleware, upload('products').single('image'), addProductImage)
-router.patch('/:id/images/:imageId/primary', authenticate, shopMiddleware, setPrimaryImage)
-router.delete('/:id/images/:imageId', authenticate, shopMiddleware, deleteProductImage)
-router.post('/', authenticate, shopMiddleware, upload('products').single('image'), createProductValidation, validateMiddleware, createProduct)
-router.put('/:id', authenticate, shopMiddleware, upload('products').single('image'), updateProductValidation, validateMiddleware, updateProduct)
-router.get('/', authenticate, shopMiddleware , getProducts)
-router.get('/:id', authenticate, shopMiddleware , getProductById)
-router.delete('/:id', authenticate, shopMiddleware, deleteProduct)
 router.get('/:id/variants', authenticate, shopMiddleware, getVariants)
+router.post('/', authenticate, shopMiddleware, upload('products').single('image'), createProductValidation, validateMiddleware, createProduct)
+router.post('/:id/flash-sale', authenticate, shopMiddleware, createFlashSaleValidation, validateMiddleware, createFlashSaleHandler)
 router.post('/:id/variants', authenticate, shopMiddleware, createVariantValidation, validateMiddleware, createVariant)
+router.post('/:id/tags', authenticate, shopMiddleware, addTagsValidation, validateMiddleware, addTags)
+router.post('/:id/images', authenticate, shopMiddleware, upload('products').single('image'), addProductImage)
+router.put('/:id', authenticate, shopMiddleware, upload('products').single('image'), updateProductValidation, validateMiddleware, updateProduct)
 router.put('/:id/variants/:variantId', authenticate, shopMiddleware, updateVariantValidation, validateMiddleware, updateVariant)
+router.patch('/:id/images/:imageId/primary', authenticate, shopMiddleware, setPrimaryImage)
+router.delete('/:id', authenticate, shopMiddleware, deleteProduct)
 router.delete('/:id/variants/:variantId', authenticate, shopMiddleware, deleteVariant)
+router.delete('/:id/images/:imageId', authenticate, shopMiddleware, deleteProductImage)
+
 export default router
-
-
 
 // 📖 product.routes.ts — FULL explanation, every route 🎬
 
