@@ -9,7 +9,54 @@ import * as productService from '../services/product.service';
 import { successResponse } from '../utils/response';
 import ProductImage from '../models/Productimage';
 import cloudinary from '../config/cloudinary';
-import 'multer'; // makes Express.Multer.File type available
+import 'multer'; 
+import ProductView from '../models/Productview';
+import SearchLog from '../models/Searchlog';
+
+// ===========================
+// LOG PRODUCT VIEW
+// ===========================
+export const logProductView = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const product_id = Number(req.params.id);
+    const shop_id = req.user!.shop_id  as number;
+    const user_id = req.user?.id ?? null; // null if guest
+
+    // fire and forget — don't await, don't block the response!
+    ProductView.create({ product_id, shop_id, user_id, viewed_at: new Date() }).catch(() => {});
+
+    res.status(200).json(successResponse({ message: 'Product view logged' }));
+  } catch (error) { next(error); }
+};
+
+// ===========================
+// LOG SEARCH
+// ===========================
+export const logSearch = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const shop_id = req.user!.shop_id as number;
+    const { query, results_count } = req.body;  // from request body
+
+    SearchLog.create({ shop_id, user_id: req.user?.id ?? null, query, results_count }).catch(() => {});
+
+    res.status(200).json(successResponse({ message: 'Product search logged' }));
+  } catch (error) { next(error); }
+};
+
+
+
+
+// ===========================
+// PRODUCT VARIANTS 
+// ===========================
 export const getVariants = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
@@ -122,7 +169,9 @@ export const deleteProduct = async (req: Request<{ id: string }>, res: Response,
     // 404 → product not found or doesn't belong to this shop
   }
 };
-
+// ===========================
+// IMAGES
+// ===========================
 export const getProductImages = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;

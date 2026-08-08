@@ -53,7 +53,6 @@ router.delete('/:id/images/:imageId', authenticate, shopMiddleware, deleteProduc
 
 export default router
 
-
 // 📖 product.routes.ts — FULL explanation, every route 🎬
 
 // 🎭 the big picture
