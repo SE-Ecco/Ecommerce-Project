@@ -21,14 +21,14 @@ import { body } from 'express-validator'; // body() = validates fields from req.
 // registerValidation = array of rules that run one by one on POST /api/auth/register
 export const registerValidation = [
 
-  body('name')
+  body('full_name')
     .notEmpty().withMessage('Full name is required'), // rejects empty or missing full_name
 
   body('email')
     .notEmpty().withMessage('Email is required')      // rejects empty or missing email
     .isEmail().withMessage('Email must be valid'),    // rejects "notanemail" format
 
-  body('password_hash')
+  body('password')
     .notEmpty().withMessage('Password is required')   // rejects empty or missing password
     .isLength({ min: 8 }).withMessage('Password must be at least 8 characters'), // rejects "abc123"
 
@@ -41,7 +41,7 @@ export const loginValidation = [
     .notEmpty().withMessage('Email is required')      // rejects empty or missing email
     .isEmail().withMessage('Email must be valid'),    // rejects "notanemail" format
 
-  body('password_hash')
+  body('password')
     .notEmpty().withMessage('Password is required'),  // rejects empty or missing password
     // no isLength here — wrong password gives better error from service, not validation
 
