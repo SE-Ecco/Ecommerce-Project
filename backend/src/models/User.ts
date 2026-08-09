@@ -45,12 +45,12 @@ import sequelize from '../config/database';    // our database connection instan
 class User extends Model {
   declare id: number;                              // primary key — auto generated
   declare shop_id: number | null;               // which shop this user belongs to
-                                                   // NULL for admin users (they own the platform!)
+  declare phone: string | null;                                                 // NULL for admin users (they own the platform!)
   declare name: string;                            // full name → "Ahmed Ali"
   declare email: string;                           // login email → "ahmed@gmail.com"
   declare password_hash: string;                   // bcrypt hash → "$2b$10$..."
-                                                   // NEVER store plain password!
-  declare role: 'customer' | 'shop_admin'|'super_admin';  // what this user can do
+  // NEVER store plain password!
+  declare role: 'customer' | 'shop_admin' | 'super_admin';  // what this user can do
   declare is_active: boolean;                      // false = account disabled
   declare cloudinary_avatar_url: string | null;    // profile picture URL from Cloudinary
   declare cloudinary_avatar_public_id: string | null; // needed to delete avatar from Cloudinary
@@ -71,6 +71,10 @@ User.init(
     name: {
       type: DataTypes.STRING,    // text value → "Ahmed Ali"
       allowNull: false,          // required — every user must have a name
+    },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: true, // ← fix the DB constraint
     },
     email: {
       type: DataTypes.STRING,    // text value → "ahmed@gmail.com"
