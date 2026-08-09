@@ -16,8 +16,8 @@ export const register = async (
   next: NextFunction // 🔧 added
 ): Promise<void> => {
   try {
-    const { full_name, email, password } = req.body;
-    const result = await authService.register(full_name, email, password);
+    const { name , email, password_hash } = req.body;
+    const result = await authService.register(name, email, password_hash);
     res.status(201).json(successResponse(result));
   } catch (error) {
     next(error); // 🔧 fix
@@ -33,8 +33,8 @@ export const login = async (
   next: NextFunction // 🔧 added
 ): Promise<void> => {
   try {
-    const { email, password } = req.body;
-    const result = await authService.login(email, password);
+    const { email, password_hash } = req.body;
+    const result = await authService.login(email, password_hash);
     res.status(200).json(successResponse(result));
   } catch (error) {
     next(error); // 🔧 fix

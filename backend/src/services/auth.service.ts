@@ -14,9 +14,9 @@ import { TokenPayload } from '../types'                             // TypeScrip
 // ===========================
 
 export const register = async (
-  full_name: string, // user's full name from req.body
+  name: string, // user's full name from req.body
   email: string,     // user's email from req.body
-  password: string,  // user's plain password from req.body
+  password_hash: string,  // user's plain password from req.body
 ) => {
 
   // 1. check if email already exists — no duplicate accounts!
@@ -27,17 +27,16 @@ export const register = async (
   // already exists? → throw error → controller catches it → sends 400 to client 🛑
 
   // 2. hash the password — NEVER store plain text passwords!
-  const hashedPassword = await hashPassword(password);
+  const hashedPassword = await hashPassword(password_hash);
   // hashPassword() → bcrypt.hash(password, 12) → "$2b$12$x8Kq2..." long scrambled string
   // await → hashing takes time, wait for it to finish
 
   // 3. create new user in database with hashed password
   const newUser = await User.create({
-    name: full_name,               // 🔧 fix: model uses 'name' not 'full_name'
+    name: name,               // 🔧 fix: model uses 'name' not 'full_name'
     email,                         // shorthand for email: email
     password_hash: hashedPassword, // 🔧 fix: model uses 'password_hash' not 'password'
-    role: 'customer',
-    phone: null, // ← add this              // HARDCODED — nobody self-promotes to admin! security rule ✅
+    role: 'customer',              // HARDCODED — nobody self-promotes to admin! security rule ✅
   });
   // User.create() → INSERT INTO users (...) VALUES (...) → returns created user row
 
@@ -64,7 +63,7 @@ export const register = async (
 
 export const login = async (
   email: string,    // email from req.body
-  password: string, // plain password from req.body
+  password_hash: string, // plain password from req.body
 ) => {
 
   // 1. find user by email — do they exist?
@@ -75,7 +74,7 @@ export const login = async (
   // hacker can't tell WHICH one is wrong → can't guess valid emails! 🔒
 
   // 2. compare plain password with stored hash
-  const isPasswordMatch = await comparePassword(password, user.password_hash);
+  const isPasswordMatch = await comparePassword(password_hash, user.password_hash);
   // comparePassword() → bcrypt.compare(plain, hash) → true or false
   // bcrypt internally hashes the plain password and compares with stored hash
   if (!isPasswordMatch) throw new Error('Invalid email or password');
