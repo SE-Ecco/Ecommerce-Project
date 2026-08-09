@@ -36,7 +36,8 @@ export const register = async (
     name: full_name,               // 🔧 fix: model uses 'name' not 'full_name'
     email,                         // shorthand for email: email
     password_hash: hashedPassword, // 🔧 fix: model uses 'password_hash' not 'password'
-    role: 'customer',              // HARDCODED — nobody self-promotes to admin! security rule ✅
+    role: 'customer',
+    phone: null, // ← add this              // HARDCODED — nobody self-promotes to admin! security rule ✅
   });
   // User.create() → INSERT INTO users (...) VALUES (...) → returns created user row
 
