@@ -6,15 +6,39 @@
 // IMPORTS: store/authStore.ts
 // USED BY: components/auth/ProtectedRoute, pages/*, components/layout/Navbar, Sidebar
 // RETURNS: user, isAuthenticated, isCustomer, isShopAdmin, isSuperAdmin, setAuth, logout
+// WHAT: Hook for auth state — reads authStore, exposes helpers
+// IMPORTS: authStore, authService
+// USED BY: LoginPage, RegisterPage, ProtectedRoute, Navbar
 
 import { useAuthStore } from '../store/authStore'
+import * as authService from '../services/authService'
 
 export const useAuth = () => {
   const { user, token, isAuthenticated, setAuth, logout } = useAuthStore()
 
+  // role helpers — avoids repeating user?.role === '...' everywhere
   const isCustomer = user?.role === 'customer'
   const isShopAdmin = user?.role === 'shop_admin'
   const isSuperAdmin = user?.role === 'super_admin'
+
+  // login → calls service → saves to store
+  const login = async (email: string, password: string) => {
+    const data = await authService.login(email, password)
+    setAuth(data.user, data.token)
+    return data
+  }
+
+  // register → calls service → saves to store
+  const register = async (
+    full_name: string,
+    email: string,
+    password: string,
+    phone?: string
+  ) => {
+    const data = await authService.register(full_name, email, password, phone)
+    setAuth(data.user, data.token)
+    return data
+  }
 
   return {
     user,
@@ -23,11 +47,11 @@ export const useAuth = () => {
     isCustomer,
     isShopAdmin,
     isSuperAdmin,
-    setAuth,
+    login,
+    register,
     logout,
   }
 }
-
 // NOTES:
 // → useAuthStore: the only import this hook needs — all raw auth state (user, token,
 //   isAuthenticated) plus the actions (setAuth, logout) already live inside the
