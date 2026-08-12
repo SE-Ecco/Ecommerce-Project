@@ -9,13 +9,16 @@
 // User → represents a user account
 // =========================
 export type User = {
-  id: number;                  // User ID
-  shop_id: number;             // Shop this user belongs to
-  full_name: string;           // Full name
-  email: string;               // Email address
-  phone: string;               // Phone number
-  role: 'shop_admin' | 'customer' | 'super_admin'; // User role
-  created_at?: string;         // Created date (optional)
+  id: number;                              // User ID
+  shop_id: number | null;                  // null for super_admin
+  name: string;                            // full name → "Ahmed Ali"
+  email: string;                           // login email
+  role: 'customer' | 'shop_admin' | 'super_admin'; // user role
+  is_active: boolean;                      // false = disabled
+  cloudinary_avatar_url: string | null;    // profile picture URL
+  cloudinary_avatar_public_id: string | null; // for deleting avatar
+  created_at?: string;                     // auto by Sequelize
+  updated_at?: string;                     // auto by Sequelize
 };
 
 

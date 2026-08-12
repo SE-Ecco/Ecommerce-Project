@@ -3,30 +3,35 @@
 // USED BY: routes/index.tsx (wraps shop_admin and super_admin routes)
 // FLOW: not logged in → /login | wrong role → /unauthorized | ok → render page
 
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+// WHAT: Guards private routes — redirects if not authenticated or wrong role
+// IMPORTS: useAuth, react-router-dom
+// USED BY: routes/index.tsx
 
-interface ProtectedRouteProps {
-  allowedRoles: string[];
+import { Navigate, Outlet } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
+
+interface Props {
+  allowedRoles?: ('customer' | 'shop_admin' | 'super_admin')[]
 }
 
-const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
-  const { isAuthenticated, user } = useAuth();
+const ProtectedRoute = ({ allowedRoles }: Props) => {
+  const { isAuthenticated, user } = useAuth()
 
+  // not logged in → go to login
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
-  if (!allowedRoles.includes(user!.role)) {
-    return <Navigate to="/unauthorized" replace />;
+  // logged in but wrong role → go to unauthorized
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/unauthorized" replace />
   }
 
-  return <Outlet />;
-};
+  // all good → render the child route
+  return <Outlet />
+}
 
-export default ProtectedRoute;
-
-
+export default ProtectedRoute
 // NOTES:
 // → Navigate (react-router-dom): redirects the user without a full page
 //   reload — this is the React-way of "send them to another URL." Used
