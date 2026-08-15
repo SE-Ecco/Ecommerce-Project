@@ -12,7 +12,8 @@ interface ButtonProps {
   color?: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'; // theme COLOR
   disabled?: boolean;             // is it clickable right now?
   type?: 'button' | 'submit' | 'reset';  // needed for forms (submit buttons)
-  fullWidth?: boolean;            // stretch to 100% width
+  fullWidth?: boolean; 
+  className?: string;           // stretch to 100% width
 }
 
 function Button({
@@ -23,6 +24,7 @@ function Button({
   disabled,
   type = 'button',         // default: NOT a form-submit button
   fullWidth,
+  className,
 }: ButtonProps) {
   return (
     <MuiButton
@@ -32,6 +34,7 @@ function Button({
       disabled={disabled}
       type={type}
       fullWidth={fullWidth}
+      className={className}
     >
       {children}
       {/* everything just passes straight through to MUI's real Button */}
