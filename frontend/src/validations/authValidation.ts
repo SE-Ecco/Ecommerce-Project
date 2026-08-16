@@ -6,6 +6,10 @@
 // IMPORTS: yup
 // USED BY: LoginPage.tsx, RegisterPage.tsx (via Formik)
 
+// WHAT: Yup validation schemas for auth forms
+// IMPORTS: yup
+// USED BY: LoginPage.tsx, RegisterPage.tsx
+
 import * as Yup from 'yup'
 
 // ===========================
@@ -15,7 +19,6 @@ export const loginSchema = Yup.object({
   email: Yup.string()
     .email('Email must be valid')
     .required('Email is required'),
-
   password: Yup.string()
     .required('Password is required'),
 })
@@ -26,15 +29,15 @@ export const loginSchema = Yup.object({
 export const registerSchema = Yup.object({
   full_name: Yup.string()
     .required('Full name is required'),
-
   email: Yup.string()
     .email('Email must be valid')
     .required('Email is required'),
-
+  phone: Yup.string()
+    .optional(),
   password: Yup.string()
     .min(8, 'Password must be at least 8 characters')
     .required('Password is required'),
-
-  phone: Yup.string()
-    .optional(),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password')], 'Passwords must match') // 🔧 added
+    .required('Please confirm your password'),             // 🔧 added
 })
