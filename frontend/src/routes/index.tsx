@@ -23,44 +23,27 @@
 //   /unauthorized                  → UnauthorizedPage
 //   *                              → NotFoundPage
 
+// WHAT: All app routes — maps URLs to pages
+// IMPORTS: pages, layouts, ProtectedRoute
+// USED BY: App.tsx
+
 import { Routes, Route } from 'react-router-dom'
 import MainLayout from '../components/layout/MainLayout'
+import ProtectedRoute from '../components/auth/ProtectedRoute'
+import LoginPage from '../pages/auth/LoginPage'
+import RegisterPage from '../pages/auth/RegisterPage'
+import NotFoundPage from '../pages/error/NotFoundPage'
+import UnauthorizedPage from '../pages/error/UnauthorizedPage'
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<MainLayout />}>
-        {/* TODO: path="/" element={<HomePage />} */}
-        {/* TODO: path="/login" element={<LoginPage />} */}
-        {/* TODO: path="/register" element={<RegisterPage />} */}
-        {/* TODO: path="/shops/:slug/products" element={<ProductsPage />} */}
-        {/* TODO: path="/shops/:slug/products/:id" element={<ProductDetailPage />} */}
-        {/* TODO: path="/cart" element={<CartPage />} */}
-
-        {/* TODO: ProtectedRoute wrapper needed once it's built
-            path="/checkout" element={<CheckoutPage />} */}
-        {/* TODO: ProtectedRoute wrapper needed once it's built
-            path="/my-orders" element={<CustomerOrdersPage />} */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
-
-      {/* TODO: Route element={<ProtectedRoute allowedRoles={['shop_admin']} />}
-          wrapping Route element={<DashboardLayout />} with:
-            path="/owner/dashboard"  element={<OwnerDashboard />}
-            path="/owner/products"   element={<OwnerProducts />}
-            path="/owner/orders"     element={<OwnerOrders />}
-            path="/owner/categories" element={<OwnerCategories />}
-            path="/owner/profile"    element={<OwnerProfile />}
-      */}
-
-      {/* TODO: Route element={<ProtectedRoute allowedRoles={['super_admin']} />}
-          wrapping Route element={<DashboardLayout />} with:
-            path="/admin/dashboard" element={<AdminDashboard />}
-            path="/admin/shops"     element={<AdminShops />}
-            path="/admin/users"     element={<AdminUsers />}
-      */}
-
-      {/* TODO: path="/unauthorized" element={<UnauthorizedPage />} */}
-      {/* TODO: path="*" element={<NotFoundPage />} */}
     </Routes>
   )
 }
