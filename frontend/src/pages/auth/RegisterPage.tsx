@@ -63,6 +63,7 @@ export default function RegisterPage() {
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           error={!!(formik.touched.full_name && formik.errors.full_name)}
+          helperText={formik.touched.full_name ? formik.errors.full_name : undefined} // 🔧 fix
         />
 
         <Input
@@ -73,6 +74,7 @@ export default function RegisterPage() {
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           error={!!(formik.touched.email && formik.errors.email)}
+          helperText={formik.touched.email ? formik.errors.email : undefined} // 🔧 fix
         />
 
         <Input
@@ -82,6 +84,7 @@ export default function RegisterPage() {
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           error={!!(formik.touched.phone && formik.errors.phone)}
+          helperText={formik.touched.phone ? formik.errors.phone : undefined} // 🔧 fix
         />
 
         <Input
@@ -92,6 +95,7 @@ export default function RegisterPage() {
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           error={!!(formik.touched.password && formik.errors.password)}
+          helperText={formik.touched.password ? formik.errors.password : undefined} // 🔧 fix
         />
 
         <Input
@@ -102,6 +106,7 @@ export default function RegisterPage() {
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           error={!!(formik.touched.confirmPassword && formik.errors.confirmPassword)}
+          helperText={formik.touched.confirmPassword ? formik.errors.confirmPassword : undefined} // 🔧 fix
         />
 
         <Button
