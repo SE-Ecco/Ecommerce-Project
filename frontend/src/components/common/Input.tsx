@@ -9,7 +9,7 @@ interface InputProps {
   name: string;                   // matches the Formik field name (e.g. "email")
   value: string;                  // current typed value
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;  // fires on every keystroke
-  onBlur?: () => void;            // fires when user clicks AWAY (Formik uses this to validate)
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;          // fires when user clicks AWAY (Formik uses this to validate)
   error?: boolean;                // true = show red error styling
   helperText?: string;            // the actual error message text (e.g. "Email is required")
   type?: string;                  // "text" | "email" | "password" etc.
