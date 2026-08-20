@@ -29,6 +29,7 @@ export const PRODUCT_CATEGORIES = [
   'Electronics',
   'Fashion',]
 
+  export const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || ''
 
   //zhegir notes
 // ─────────────────────────────────────────────
