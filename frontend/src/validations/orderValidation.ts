@@ -4,23 +4,28 @@
 // CONTAINS: checkoutSchema (address — required, min length)
 
 
-import * as yup from 'yup';
 
-export const orderHelpSchema = yup.object({
-  order_id: yup.string().required('Please select an order'),
-  reason: yup
-    .string()
-    .oneOf(['wrong_item', 'damaged', 'refund', 'other'], 'Please select a valid reason')
+import * as Yup from 'yup'
+
+export const orderHelpSchema = Yup.object({
+  order_id: Yup.string()
+    .required('Please select an order'),
+
+  reason: Yup.string()
+    .oneOf(
+      ['wrong_item', 'damaged', 'refund', 'other'],
+      'Please select a valid reason'
+    )
     .required('Please select a reason'),
-  message: yup
-    .string()
+
+  message: Yup.string()
     .min(10, 'Please describe the issue in at least 10 characters')
     .required('Please describe the issue'),
-  phone: yup
-    .string()
+
+  phone: Yup.string()
     .matches(/^[0-9+\s-]{7,15}$/, 'Please enter a valid phone number')
     .required('Phone number is required'),
-});
+})
 
 // NOTES:
 // → yup.object({...}): wraps all 4 field rules into one schema object, the
