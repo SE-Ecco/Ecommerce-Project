@@ -1,5 +1,5 @@
 // WHAT: Homepage — shows all active shops so customer picks one
-// IMPORTS: services/shopService, components/common/Spinner, framer-motion
+// IMPORTS: services/shopService, components/common/Spinner
 // FLOW: load all shops → display shop cards → click → go to /shops/:slug/products
 
 import { useEffect, useState } from 'react'
@@ -64,7 +64,7 @@ const HomePage = () => {
               className="cursor-pointer border rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
             >
               <img
-                src={shop.logo_url || '/placeholder-shop.png'}  // Need image
+                src={shop.cloudinary_logo_url || '/placeholder-shop.png'} // 🔧 fix
                 alt={shop.name}
                 className="w-full h-40 object-cover rounded mb-3"
               />

@@ -14,6 +14,11 @@ export const getProducts = async (): Promise<Product[]> => {
 export const getProductById = async (id: number): Promise<Product> => {
   const response = await api.get(`/products/${id}`)
   return response.data.data
+} 
+
+export const getProductsBySlug = async (slug: string): Promise<Product[]> => {
+  const response = await api.get(`/products/shop/${slug}`)
+  return response.data.data
 }
 
 export const createProduct = async (data: FormData): Promise<Product> => {

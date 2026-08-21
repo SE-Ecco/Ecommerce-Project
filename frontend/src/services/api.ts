@@ -2,42 +2,41 @@
 // IMPORTS: config/constants.ts (API_BASE_URL, AUTH_TOKEN_KEY)
 // USED BY: authService, productService, orderService, shopService, categoryService, userService
 // KEY: Auto-attaches JWT token to every request. Redirects to /login on 401.
-import axios from 'axios';
+// WHAT: Configured Axios instance — base URL + Bearer token interceptor
+// IMPORTS: config/constants.ts
+// USED BY: all service files
 
-import { API_BASE_URL,AUTH_TOKEN_KEY} from '../config/constants';
-/*
-first of all we make the API_BASE_URL in constants.ts
-becouse the name of the file is constants.ts
-and we put some specific values that need to be constant across the whole frontend in one place
-then we import the API_BASE_URL from constants.ts into api.ts
-so that we can use it to set the baseURL for our Axios instance
-*/
+import axios from 'axios'
+import { API_BASE_URL, AUTH_TOKEN_KEY } from '../config/constants'
 
-
-//base api URL is set to an empty string, which means it will use the current domain as the base URL for API requests. You can change this to your API's base URL if needed.
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-});
+})
 
-
-//this function is an Axios request interceptor that automatically attaches a JWT token to the Authorization header of every outgoing request. It retrieves the token from localStorage using the key
+// auto-attaches Bearer token to every request
+// Zustand persist wraps token in { state: { token: '...' } }
+// so we need to parse it correctly
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(AUTH_TOKEN_KEY);
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const stored = localStorage.getItem(AUTH_TOKEN_KEY)
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored)
+      const token = parsed?.state?.token
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    } catch {
+      // not JSON → use as plain string
+      config.headers.Authorization = `Bearer ${stored}`
+    }
   }
-  return config;
-});
+  return config
+})
 
-
-
-//export default api; means that the api instance is being exported as the default export of this module. This allows other parts of the application to import and use this configured Axios instance for making API requests without needing to create a new instance each time.
-export default api;
-
-
+export default api
 
 
 

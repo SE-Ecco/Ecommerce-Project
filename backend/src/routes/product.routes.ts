@@ -26,11 +26,12 @@ import {
     getProductImages, addProductImage, setPrimaryImage, deleteProductImage,
     logSearch, logProductView,
     addTags, getProductsByTagHandler,
-    createFlashSaleHandler, getActiveFlashSaleHandler
+    createFlashSaleHandler, getActiveFlashSaleHandler,getProductsByShopSlug
 } from '../controllers/product.controller'
 
 const router = Router()
-
+// PUBLIC — no auth needed → customers can browse
+router.get('/shop/:slug', getProductsByShopSlug)
 router.post('/:id/views', authenticate, shopMiddleware, logProductView)
 router.post('/search-log', authenticate, shopMiddleware, logSearch)
 router.get('/', authenticate, shopMiddleware, getProducts)
