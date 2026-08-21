@@ -13,18 +13,24 @@ interface ButtonProps {
   disabled?: boolean;             // is it clickable right now?
   type?: 'button' | 'submit' | 'reset';  // needed for forms (submit buttons)
   fullWidth?: boolean; 
-  className?: string;           // stretch to 100% width
+  className?: string; // stretch to 100% width
+  sx?: object          
 }
 
+// add to interface
+
+
+// add to destructuring
 function Button({
   children,
   onClick,
-  variant = 'contained',   // default: filled/solid button
-  color = 'primary',       // default: brand blue
+  variant = 'contained',
+  color = 'primary',
   disabled,
-  type = 'button',         // default: NOT a form-submit button
+  type = 'button',
   fullWidth,
   className,
+  sx,        // ← add
 }: ButtonProps) {
   return (
     <MuiButton
@@ -35,11 +41,11 @@ function Button({
       type={type}
       fullWidth={fullWidth}
       className={className}
+      sx={sx}  // ← add
     >
       {children}
-      {/* everything just passes straight through to MUI's real Button */}
     </MuiButton>
-  );
+  )
 }
 
 export default Button;
