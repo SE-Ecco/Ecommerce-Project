@@ -27,14 +27,18 @@ export type User = {
 // Shop → represents a shop
 // =========================
 export type Shop = {
-  id: number;                  // Shop ID
-  name: string;                // Shop name
-  slug: string;                // URL-friendly name
-  description?: string;        // Shop description
-  logo_url?: string;           // Shop logo
-  is_active: boolean;          // Is the shop active?
-  created_at?: string;         // Created date
-};
+  id: number
+  name: string
+  slug: string
+  email?: string
+  phone?: string
+  description?: string
+  cloudinary_logo_url: string | null  // 🔧 fix
+  cloudinary_logo_public_id: string | null // 🔧 add
+  status: 'active' | 'inactive'       // 🔧 fix (was is_active: boolean)
+  created_at?: string
+  updated_at?: string
+}
 
 
 //   Category → id, shop_id, name, created_at

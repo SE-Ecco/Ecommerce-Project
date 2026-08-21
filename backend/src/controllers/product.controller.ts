@@ -4,12 +4,12 @@
 // HANDLES: GET all, GET by id, POST create, PUT update, DELETE
 // ⚠️ shop_id always from req.user (JWT) — never from req.body!
 
-import { Request, Response, NextFunction  } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as productService from '../services/product.service';
 import { successResponse } from '../utils/response';
 import ProductImage from '../models/Productimage';
 import cloudinary from '../config/cloudinary';
-import 'multer'; 
+import 'multer';
 import ProductView from '../models/Productview';
 import SearchLog from '../models/Searchlog';
 
@@ -23,16 +23,30 @@ export const logProductView = async (
 ): Promise<void> => {
   try {
     const product_id = Number(req.params.id);
-    const shop_id = req.user!.shop_id  as number;
+    const shop_id = req.user!.shop_id as number;
     const user_id = req.user?.id ?? null; // null if guest
 
     // fire and forget — don't await, don't block the response!
-    ProductView.create({ product_id, shop_id, user_id, viewed_at: new Date() }).catch(() => {});
+    ProductView.create({ product_id, shop_id, user_id, viewed_at: new Date() }).catch(() => { });
 
     res.status(200).json(successResponse({ message: 'Product view logged' }));
   } catch (error) { next(error); }
 };
 
+
+export const getProductsByShopSlug = async (
+  req: Request<{ slug: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { slug } = req.params
+    const products = await productService.getProductsByShopSlug(slug)
+    res.status(200).json(successResponse(products))
+  } catch (error) {
+    next(error)
+  }
+}
 // ===========================
 // LOG SEARCH
 // ===========================
@@ -45,7 +59,7 @@ export const logSearch = async (
     const shop_id = req.user!.shop_id as number;
     const { query, results_count } = req.body;  // from request body
 
-    SearchLog.create({ shop_id, user_id: req.user?.id ?? null, query, results_count }).catch(() => {});
+    SearchLog.create({ shop_id, user_id: req.user?.id ?? null, query, results_count }).catch(() => { });
 
     res.status(200).json(successResponse({ message: 'Product search logged' }));
   } catch (error) { next(error); }
@@ -78,7 +92,7 @@ export const createVariant = async (req: Request<{ id: string }>, res: Response,
 export const updateVariant = async (req: Request<{ id: string; variantId: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
-    const id = Number(req.params.variantId); 
+    const id = Number(req.params.variantId);
     const variant = await productService.updateVariant(id, shop_id, req.body);
     res.status(200).json(successResponse(variant));
   } catch (error) { next(error); }
@@ -87,7 +101,7 @@ export const updateVariant = async (req: Request<{ id: string; variantId: string
 export const deleteVariant = async (req: Request<{ id: string; variantId: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
-    const id = Number(req.params.variantId); 
+    const id = Number(req.params.variantId);
     const result = await productService.deleteVariant(id, shop_id);
     res.status(200).json(successResponse(result));
   } catch (error) { next(error); }
@@ -97,7 +111,7 @@ export const deleteVariant = async (req: Request<{ id: string; variantId: string
 // GET ALL PRODUCTS
 // ===========================
 
-export const getProducts = async (req: Request, res: Response,next: NextFunction): Promise<void> => {
+export const getProducts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number; // from JWT — guaranteed by shopMiddleware
     const products = await productService.getProducts(shop_id);
@@ -111,7 +125,7 @@ export const getProducts = async (req: Request, res: Response,next: NextFunction
 // GET ONE PRODUCT
 // ===========================
 
-export const getProductById = async (req: Request<{ id: string }>, res: Response,next: NextFunction): Promise<void> => {
+export const getProductById = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
     const id = Number(req.params.id); // URL params are always strings → convert to number
@@ -127,7 +141,7 @@ export const getProductById = async (req: Request<{ id: string }>, res: Response
 // CREATE PRODUCT
 // ===========================
 
-export const createProduct = async (req: Request, res: Response,next: NextFunction): Promise<void> => {
+export const createProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
     const product = await productService.createProduct(shop_id, req.body);
@@ -142,13 +156,13 @@ export const createProduct = async (req: Request, res: Response,next: NextFuncti
 // UPDATE PRODUCT
 // ===========================
 
-export const updateProduct = async (req: Request<{ id: string }>, res: Response,next: NextFunction): Promise<void> => {
+export const updateProduct = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
     const id = Number(req.params.id); // convert string → number
-    const product = await productService.updateProduct(id, shop_id, req.body);    
+    const product = await productService.updateProduct(id, shop_id, req.body);
     res.status(200).json(successResponse(product));
-   
+
   } catch (error) {
     next(error);
     // 404 → product not found or doesn't belong to this shop
@@ -159,13 +173,14 @@ export const updateProduct = async (req: Request<{ id: string }>, res: Response,
 // DELETE PRODUCT
 // ===========================
 
-export const deleteProduct = async (req: Request<{ id: string }>, res: Response,next: NextFunction): Promise<void> => {
+export const deleteProduct = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
     const id = Number(req.params.id); // convert string → number
     const result = await productService.deleteProduct(id, shop_id);
     res.status(200).json(successResponse(result));
-  } catch (error) { next(error);
+  } catch (error) {
+    next(error);
     // 404 → product not found or doesn't belong to this shop
   }
 };
@@ -233,7 +248,7 @@ export const deleteProductImage = async (
 =======================
 */
 
-export const addTags = async(
+export const addTags = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -249,26 +264,26 @@ export const addTags = async(
       tagNames
     );
     res.status(201).json(successResponse(result));
-  } catch (error){
-    next (error);
+  } catch (error) {
+    next(error);
   }
 };
 
 export const getProductsByTagHandler = async (
-    req: Request<{ tagName: string }>,
-    res: Response,
-    next: NextFunction
+  req: Request<{ tagName: string }>,
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
-    try {
-        const tagName = req.params.tagName;
-        const shop_id = req.user!.shop_id as number;
-        const products = await productService.getProductsByTag(
-          tagName,
-          shop_id);
-        res.status(200).json(successResponse(products));
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const tagName = req.params.tagName;
+    const shop_id = req.user!.shop_id as number;
+    const products = await productService.getProductsByTag(
+      tagName,
+      shop_id);
+    res.status(200).json(successResponse(products));
+  } catch (error) {
+    next(error);
+  }
 };
 
 
@@ -279,41 +294,41 @@ export const getProductsByTagHandler = async (
 */
 
 export const createFlashSaleHandler = async (
-    req: Request<{ id: string }>,
-    res: Response,
-    next: NextFunction
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
-    try {
-        const productId = Number(req.params.id);
-        const shop_id = req.user!.shop_id as number;
-        const { discountPct, startsAt, endsAt } = req.body;
+  try {
+    const productId = Number(req.params.id);
+    const shop_id = req.user!.shop_id as number;
+    const { discountPct, startsAt, endsAt } = req.body;
 
-        const flashSale = await productService.createFlashSale(
-            shop_id,
-            productId,
-            discountPct,
-            new Date(startsAt),
-            new Date(endsAt)
-        );
-        res.status(201).json(successResponse(flashSale));
-    } catch (error) {
-        next(error);
-    }
+    const flashSale = await productService.createFlashSale(
+      shop_id,
+      productId,
+      discountPct,
+      new Date(startsAt),
+      new Date(endsAt)
+    );
+    res.status(201).json(successResponse(flashSale));
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const getActiveFlashSaleHandler = async (
-    req: Request<{ id: string }>,
-    res: Response,
-    next: NextFunction
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
-    try {
-        const productId = Number(req.params.id);
-        const shop_id = req.user!.shop_id as number; // 🔧 added
-        const flashSale = await productService.getActiveFlashSale(productId, shop_id); // 🔧 pass shop_id
-        res.status(200).json(successResponse(flashSale));
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const productId = Number(req.params.id);
+    const shop_id = req.user!.shop_id as number; // 🔧 added
+    const flashSale = await productService.getActiveFlashSale(productId, shop_id); // 🔧 pass shop_id
+    res.status(200).json(successResponse(flashSale));
+  } catch (error) {
+    next(error);
+  }
 };
 
 /*

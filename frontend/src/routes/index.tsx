@@ -34,6 +34,10 @@ import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
 import NotFoundPage from '../pages/error/NotFoundPage'
 import UnauthorizedPage from '../pages/error/UnauthorizedPage'
+import HomePage from '../pages/shop/HomePage'
+import ProductsPage from '../pages/shop/ProductsPage'
+
+
 
 const AppRoutes = () => {
   return (
@@ -43,6 +47,8 @@ const AppRoutes = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/shops/:slug/products" element={<ProductsPage />} />
       </Route>
     </Routes>
   )

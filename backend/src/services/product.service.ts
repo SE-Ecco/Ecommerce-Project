@@ -12,6 +12,7 @@ import 'multer'; // makes Express.Multer.File type available
 import { Tag, ProductTag} from '../models/Tag-ProductTag'
 import  FlashSale from '../models/Flashsale';
 import { Op } from 'sequelize';
+import Shop from '../models/Shop'
 // ===========================
 // GET ALL PRODUCTS
 // ===========================
@@ -45,7 +46,18 @@ export const getProductById = async (id: number, shop_id: number) => {
 // ===========================
 // CREATE PRODUCT
 // ===========================
-
+export const getProductsByShopSlug = async (slug: string) => {
+  const shop = await Shop.findOne({ where: { slug } })
+  if (!shop) throw new Error('Shop not found')
+  
+  return await Product.findAll({
+    where: { 
+      shop_id: shop.id,
+      deleted_at: null,
+      is_active: true
+    }
+  })
+}
 export const createProduct = async (
   shop_id: number,
   data: {
