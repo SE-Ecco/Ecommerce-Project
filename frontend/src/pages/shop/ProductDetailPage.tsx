@@ -1,5 +1,5 @@
-// WHAT: Full product detail — image gallery, description, price, add to cart
-// IMPORTS: services/productService, hooks/useCart, utils/helpers, framer-motion
+// WHAT: Full product detail — description, price, quantity, add to cart
+// IMPORTS: productService, useCart, helpers
 // FLOW: read :id from URL → load product → display → add to cart
 
 import { useEffect, useState } from 'react'
@@ -17,7 +17,6 @@ const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [quantity, setQuantity] = useState(1)
-
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -33,7 +32,6 @@ const ProductDetailPage = () => {
         setLoading(false)
       }
     }
-
     fetchProduct()
   }, [id])
 
@@ -56,23 +54,17 @@ const ProductDetailPage = () => {
   const outOfStock = !product.is_available || product.stock === 0
 
   const handleAddToCart = () => {
-    addItem({product, quantity})
+    addItem({ product, quantity })
   }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {product.image_url ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            className="w-full h-80 object-cover rounded-lg"
-          />
-        ) : (
-          <div className="w-full h-80 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-            No image
-          </div>
-        )}
+
+        {/* image — no image_url in model, show placeholder */}
+        <div className="w-full h-80 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+          No image {/* 🔧 fix: image_url removed */}
+        </div>
 
         <div>
           <h1 className="text-2xl font-bold">{product.name}</h1>
