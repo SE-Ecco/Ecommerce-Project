@@ -1,20 +1,12 @@
-// WHAT: Customer views their own order history with status tracking
-// IMPORTS: services/orderService, components/order/OrderCard, components/common/{Spinner, Pagination}
-// FLOW: load my orders → display list with status badges → click to see details
-// ⚠️ Protected route — must be logged in as customer
+// WHAT: Shows customer's order history
+// IMPORTS: orderService, OrderStatus, Spinner
+// FLOW: load my orders → display list with status badges
 
 import { useEffect, useState } from 'react'
 import { getMyOrders } from '../../services/orderService'
 import { Order } from '../../types'
 import Spinner from '../../components/common/Spinner'
-
-const statusColors: Record<Order['status'], string> = {
-  pending: 'bg-yellow-100 text-yellow-700',
-  processing: 'bg-blue-100 text-blue-700',
-  shipped: 'bg-indigo-100 text-indigo-700',
-  delivered: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-}
+import OrderStatus from '../../components/order/OrderStatus'
 
 const CustomerOrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([])
@@ -34,7 +26,6 @@ const CustomerOrdersPage = () => {
         setLoading(false)
       }
     }
-
     fetchOrders()
   }, [])
 
@@ -80,13 +71,8 @@ const CustomerOrdersPage = () => {
                   {order.items?.length || 0} item(s)
                 </p>
               </div>
-
               <div className="text-right">
-                <span
-                  className={`inline-block text-xs px-3 py-1 rounded-full capitalize ${statusColors[order.status]}`}
-                >
-                  {order.status}
-                </span>
+                <OrderStatus status={order.status} /> {/* 🔧 fix */}
                 <p className="font-bold mt-2">
                   {order.total_price.toLocaleString()} IQD
                 </p>
