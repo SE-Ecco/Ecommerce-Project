@@ -2,7 +2,6 @@
 // IMPORTS: services/productService, components/product/ProductForm, hooks/useAuth
 // PROTECTED: role = shop_admin only
 
-
 import { useEffect, useState } from 'react'
 import { getProducts, deleteProduct } from '../../services/productService'
 import { Product } from '../../types'
@@ -14,7 +13,6 @@ const OwnerProducts = () => {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
@@ -89,7 +87,10 @@ const OwnerProducts = () => {
 
       {showForm && (
         <div className="border rounded-lg p-6 bg-white mb-8">
-          <ProductForm product={editingProduct || undefined} onSuccess={handleFormSuccess} />
+          <ProductForm
+            product={editingProduct || undefined}
+            onSuccess={handleFormSuccess}
+          />
           <button
             onClick={closeForm}
             className="text-sm text-gray-500 mt-3 hover:underline"
@@ -105,20 +106,16 @@ const OwnerProducts = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
             <div key={product.id} className="border rounded-lg p-4 bg-white">
-              {product.image_url ? (
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className="w-full h-32 object-cover rounded mb-3"
-                />
-              ) : (
-                <div className="w-full h-32 bg-gray-100 rounded mb-3 flex items-center justify-center text-gray-400 text-sm">
-                  No image
-                </div>
-              )}
+
+              {/* no image_url in model → always show placeholder 🔧 */}
+              <div className="w-full h-32 bg-gray-100 rounded mb-3 flex items-center justify-center text-gray-400 text-sm">
+                No image
+              </div>
 
               <h2 className="font-semibold truncate">{product.name}</h2>
-              <p className="text-blue-600 font-bold">{product.price.toLocaleString()} IQD</p>
+              <p className="text-blue-600 font-bold">
+                {product.price.toLocaleString()} IQD
+              </p>
 
               <span
                 className={`inline-block mt-1 text-xs px-2 py-1 rounded ${
@@ -136,7 +133,11 @@ const OwnerProducts = () => {
                 <Button variant="outlined" onClick={() => openEditForm(product)}>
                   Edit
                 </Button>
-                <Button variant="outlined" color="error" onClick={() => handleDelete(product.id)}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => handleDelete(product.id)}
+                >
                   Delete
                 </Button>
               </div>
