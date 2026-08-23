@@ -6,14 +6,7 @@ import { useEffect, useState } from 'react'
 import { getShopOrders } from '../../services/orderService'
 import { Order } from '../../types'
 import Spinner from '../../components/common/Spinner'
-
-const statusColors: Record<Order['status'], string> = {
-  pending: 'bg-yellow-100 text-yellow-700',
-  processing: 'bg-blue-100 text-blue-700',
-  shipped: 'bg-indigo-100 text-indigo-700',
-  delivered: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-}
+import OrderStatus from '../../components/order/OrderStatus'
 
 const OwnerDashboard = () => {
   const [orders, setOrders] = useState<Order[]>([])
@@ -33,7 +26,6 @@ const OwnerDashboard = () => {
         setLoading(false)
       }
     }
-
     fetchOrders()
   }, [])
 
@@ -68,19 +60,18 @@ const OwnerDashboard = () => {
     <div className="max-w-5xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 
+      {/* stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
         <div className="border rounded-lg p-6 bg-white">
           <p className="text-sm text-gray-500">Total Orders</p>
           <p className="text-3xl font-bold mt-2">{totalOrders}</p>
         </div>
-
         <div className="border rounded-lg p-6 bg-white">
           <p className="text-sm text-gray-500">Total Revenue</p>
           <p className="text-3xl font-bold mt-2">
             {totalRevenue.toLocaleString()} IQD
           </p>
         </div>
-
         <div className="border rounded-lg p-6 bg-white">
           <p className="text-sm text-gray-500">Pending Orders</p>
           <p className="text-3xl font-bold mt-2 text-yellow-600">
@@ -89,8 +80,8 @@ const OwnerDashboard = () => {
         </div>
       </div>
 
+      {/* recent orders */}
       <h2 className="text-lg font-semibold mb-4">Recent Orders</h2>
-
       {recentOrders.length === 0 ? (
         <p className="text-gray-500">No orders yet.</p>
       ) : (
@@ -109,11 +100,7 @@ const OwnerDashboard = () => {
                 </p>
               </div>
               <div className="text-right">
-                <span
-                  className={`inline-block text-xs px-3 py-1 rounded-full capitalize ${statusColors[order.status]}`}
-                >
-                  {order.status}
-                </span>
+                <OrderStatus status={order.status} /> {/* 🔧 fix */}
                 <p className="font-bold mt-2">
                   {order.total_price.toLocaleString()} IQD
                 </p>
