@@ -1,17 +1,17 @@
-// WHAT: Global wishlist state — customer's saved/favorited products, persisted in localStorage
-// IMPORTS: zustand, zustand/middleware (persist), types/index.ts (WishlistItem, Product)
+// WHAT: Global wishlist state — customer's saved/favorited products
+// IMPORTS: zustand, zustand/middleware (persist), types
 // USED BY: hooks/useWishlist.ts
 
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { WishlistItem, Product } from '../types';
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { WishlistItem, Product } from '../types'
 
 interface WishlistState {
-  items: WishlistItem[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: number) => void;
-  isInWishlist: (productId: number) => boolean;
-  clearWishlist: () => void;
+  items: WishlistItem[]
+  addItem: (item: WishlistItem) => void     // 🔧 takes full WishlistItem (with id)
+  removeItem: (productId: number) => void
+  isInWishlist: (productId: number) => boolean
+  clearWishlist: () => void
 }
 
 export const useWishlistStore = create<WishlistState>()(
@@ -19,21 +19,21 @@ export const useWishlistStore = create<WishlistState>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product) => {
-        const exists = get().items.some((i) => i.product.id === product.id);
+      addItem: (item) => {
+        const exists = get().items.some((i) => i.product.id === item.product.id)
         if (!exists) {
-          set({ items: [...get().items, { product }] });
+          set({ items: [...get().items, item] }) // 🔧 stores full item with id
         }
       },
 
       removeItem: (productId) => {
         set({
           items: get().items.filter((i) => i.product.id !== productId),
-        });
+        })
       },
 
       isInWishlist: (productId) => {
-        return get().items.some((i) => i.product.id === productId);
+        return get().items.some((i) => i.product.id === productId)
       },
 
       clearWishlist: () => set({ items: [] }),
@@ -42,7 +42,7 @@ export const useWishlistStore = create<WishlistState>()(
       name: 'wishlist-storage',
     }
   )
-);
+)
 
 // NOTES:
 // → create + persist (zustand) — same middleware pattern as cartStore, so this store
