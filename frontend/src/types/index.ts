@@ -140,20 +140,22 @@ export type PaginatedResponse<T> = {
 
 //final thing adding new type called wishlistItem & notification
 export type WishlistItem = {
-  product: Product;
-};
+  id: number        // backend wishlist row id → needed for delete
+  product: Product
+}
 
+// add Notification type
 export type Notification = {
-  id: number;
-  user_id: number;
-  shop_id: number;
-  type: string;
-  title: string;
-  body: string;
-  is_read: boolean;
-  data: object | null;
-  created_at?: string;
-};
+  id: number
+  user_id: number
+  shop_id: number
+  type: string
+  title: string
+  body: string
+  is_read: boolean
+  data: object | null
+  created_at?: string
+}
 
 /*
 ==========================================
