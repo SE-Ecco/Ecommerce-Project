@@ -135,6 +135,26 @@ export type PaginatedResponse<T> = {
   totalPages: number; // Total number of pages
 };
 
+
+
+
+//final thing adding new type called wishlistItem & notification
+export type WishlistItem = {
+  product: Product;
+};
+
+export type Notification = {
+  id: number;
+  user_id: number;
+  shop_id: number;
+  type: string;
+  title: string;
+  body: string;
+  is_read: boolean;
+  data: object | null;
+  created_at?: string;
+};
+
 /*
 ==========================================
 📖 STORY — How all these types work together
