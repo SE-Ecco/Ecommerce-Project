@@ -26,7 +26,7 @@ const NotFoundPage = () => {
         The page you're looking for doesn't exist or has been moved.
       </Typography>
       <Link to="/">
-        <Button variant="primary">Go Back Home</Button>
+        <Button variant="contained">Go Back Home</Button>
       </Link>
     </Box>
   );
