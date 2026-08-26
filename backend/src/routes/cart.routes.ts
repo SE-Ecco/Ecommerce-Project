@@ -5,7 +5,7 @@ import { shopMiddleware } from '../middleware/shop.middleware'
 
 const router = Router();
 
-router.post('/', authenticate, shopMiddleware, addToCart)
+router.post('/', authenticate, addToCart)
 router.get('/', authenticate, shopMiddleware, getCart)
 router.put('/:id', authenticate, shopMiddleware, updateQuantity)
 router.delete('/:id', authenticate, shopMiddleware, removeFromCart)
