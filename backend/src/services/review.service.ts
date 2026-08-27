@@ -10,10 +10,16 @@ export const createReview = async (
     const product = await Product.findByPk(productId);
     if (!product) throw new Error('Product not found');
 
+    // ✅ CHECK: already reviewed?
+    const existing = await Review.findOne({
+        where: { user_id: userId, product_id: productId }
+    });
+    if (existing) throw new Error('You have already reviewed this product');
+
     return await Review.create({
         user_id: userId,
         product_id: productId,
-        shop_id: product.shop_id,  // 🔧 derived safely from product
+        shop_id: product.shop_id,
         rating,
         comment
     });
