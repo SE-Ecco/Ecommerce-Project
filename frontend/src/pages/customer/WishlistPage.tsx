@@ -26,9 +26,9 @@ const WishlistPage = () => {
     fetchWishlist()
   }, [])
 
-  const handleRemove = async (wishlistId: number) => {
+  const handleRemove = async (wishlistId: number, productId: number) => {
     try {
-      await removeFromWishlist(wishlistId)
+      await removeFromWishlist(wishlistId, productId)
       setItems((prev) => prev.filter((i) => i.id !== wishlistId))
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Could not remove item.')

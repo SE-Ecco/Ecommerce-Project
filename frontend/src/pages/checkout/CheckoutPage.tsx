@@ -1,17 +1,13 @@
 // WHAT: Order confirmation + delivery address + place order
-// IMPORTS: hooks/useCart, services/orderService, validations/orderValidation, formik
+// IMPORTS: hooks/useCart, services/orderService, validations/orderValidation
 // FLOW: show cart summary → enter address → place order → clear cart → success redirect
 // ⚠️ Protected route — must be logged in as customer
-// WHAT: Checkout — select address, shipping, place order
-// IMPORTS: orderService, addressService, shippingService, useCart
-// PROTECTED: role = customer
 
 import { useEffect, useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useCart } from '../../hooks/useCart'
 import { placeOrder } from '../../services/orderService'
 import { getAddresses } from '../../services/addressService'
-import { getShippingMethods } from '../../services/shippingService'
 import { formatPrice } from '../../utils/helpers'
 import Spinner from '../../components/common/Spinner'
 import Button from '../../components/common/Button'
@@ -21,7 +17,6 @@ const CheckoutPage = () => {
   const navigate = useNavigate()
 
   const [addresses, setAddresses] = useState<any[]>([])
-  const [shippingMethods, setShippingMethods] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [placing, setPlacing] = useState(false)
   const [error, setError] = useState('')
@@ -32,12 +27,8 @@ const CheckoutPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [addr, shipping] = await Promise.all([
-          getAddresses(),
-          getShippingMethods(),
-        ])
+        const addr = await getAddresses()
         setAddresses(addr)
-        setShippingMethods(shipping)
       } catch (err: any) {
         setError(err?.response?.data?.message || 'Could not load checkout data.')
       } finally {
@@ -146,7 +137,7 @@ const CheckoutPage = () => {
       </div>
 
       <Button fullWidth disabled={placing || !selectedAddress} onClick={handlePlaceOrder}>
-                {placing ? 'Placing Order...' : 'Place Order'}
+        {placing ? 'Placing Order...' : 'Place Order'}
       </Button>
     </div>
   )

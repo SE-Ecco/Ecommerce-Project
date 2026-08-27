@@ -10,7 +10,7 @@ import { Product } from '../../types'
 interface Props {
   product: Product
   wishlistId: number
-  onRemove: (wishlistId: number) => void
+  onRemove: (wishlistId: number, productId: number) => void
 }
 
 const WishlistItem = ({ product, wishlistId, onRemove }: Props) => {
@@ -34,9 +34,9 @@ const WishlistItem = ({ product, wishlistId, onRemove }: Props) => {
       </Box>
 
       {/* remove button */}
-      <IconButton
+       <IconButton
         color="error"
-        onClick={() => onRemove(wishlistId)}
+        onClick={() => onRemove(wishlistId, product.id)}
       >
         <DeleteIcon />
       </IconButton>

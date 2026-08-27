@@ -4,8 +4,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { WishlistItem, Product } from '../types'
-
+import { WishlistItem } from '../types'
 interface WishlistState {
   items: WishlistItem[]
   addItem: (item: WishlistItem) => void     // 🔧 takes full WishlistItem (with id)
