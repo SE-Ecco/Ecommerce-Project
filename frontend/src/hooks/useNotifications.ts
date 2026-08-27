@@ -17,7 +17,7 @@ export function useNotifications() {
     try {
       const data = await getNotifications();
       setNotifications(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load notifications');
     } finally {
       setLoading(false);
@@ -28,7 +28,7 @@ export function useNotifications() {
     try {
       await markAsReadService(id);
       markAsReadStore(id);
-    } catch (err) {
+    } catch {
       setError('Failed to mark notification as read');
     }
   };
@@ -37,14 +37,13 @@ export function useNotifications() {
     try {
       await deleteNotification(id);
       removeNotificationStore(id);
-    } catch (err) {
+    } catch {
       setError('Failed to delete notification');
     }
   };
 
   return { items, unreadCount, loading, error, fetchNotifications, markAsRead, removeNotification };
 }
-
 // NOTES:
 // → useNotificationStore (store/notificationStore) — pulls read state (items,
 //   unreadCount) plus the store's own update functions. Those are renamed on

@@ -12,7 +12,7 @@ export const getProducts = async (): Promise<Product[]> => {
 }
 
 export const getProductById = async (id: number): Promise<Product> => {
-  const response = await api.get(`/products/${id}`)
+  const response = await api.get(`/products/public/${id}`)
   return response.data.data
 } 
 

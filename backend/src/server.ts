@@ -1,6 +1,7 @@
 // WHAT: Entry point — connects DB then starts HTTP server
 // IMPORTS: app.ts, config/database.ts
 // FLOW: connectDB() → app.listen(PORT)
+import './models/index';
 import app from './app';
 import database from './config/database';
 import {env} from './config/env';

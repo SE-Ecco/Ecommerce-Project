@@ -145,8 +145,8 @@ const CheckoutPage = () => {
         </div>
       </div>
 
-      <Button fullWidth disabled={placing} onClick={handlePlaceOrder}>
-        {placing ? 'Placing Order...' : 'Place Order'}
+      <Button fullWidth disabled={placing || !selectedAddress} onClick={handlePlaceOrder}>
+                {placing ? 'Placing Order...' : 'Place Order'}
       </Button>
     </div>
   )

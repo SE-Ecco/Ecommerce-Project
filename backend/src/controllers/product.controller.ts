@@ -136,7 +136,15 @@ export const getProductById = async (req: Request<{ id: string }>, res: Response
     // 404 → product not found or doesn't belong to this shop
   }
 };
-
+export const getPublicProductById = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+    const product = await productService.getPublicProductById(id);
+    res.status(200).json(successResponse(product));
+  } catch (error) {
+    next(error);
+  }
+};
 // ===========================
 // CREATE PRODUCT
 // ===========================

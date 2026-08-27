@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react'
 import { getShops } from '../../services/shopService'
-import { updateShopStatus } from '../../services/adminService.ts'
+import { updateShopStatus } from '../../services/adminService'
 import { Shop } from '../../types'
 import Spinner from '../../components/common/Spinner'
 import Button from '../../components/common/Button'

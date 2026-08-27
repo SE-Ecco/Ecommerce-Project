@@ -22,7 +22,7 @@ import {
 } from '../validations/product.validation'
 import { upload } from '../middleware/upload.middleware'
 import {
-    getProducts, getProductById, createProduct, updateProduct, deleteProduct,
+    getProducts, getProductById, getPublicProductById, createProduct, updateProduct, deleteProduct,
     getVariants, createVariant, updateVariant, deleteVariant,
     getProductImages, addProductImage, setPrimaryImage, deleteProductImage,
     logSearch, logProductView,
@@ -33,6 +33,7 @@ import {
 const router = Router()
 
 // PUBLIC — no auth needed → customers can browse
+router.get('/public/:id', getPublicProductById)
 router.get('/shop/:slug', getProductsByShopSlug)
 
 // VENDOR ANALYTICS — auth required but not role-restricted

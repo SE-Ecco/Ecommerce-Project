@@ -40,7 +40,7 @@ const ProductReviews = ({ productId }: Props) => {
   const handleSubmit = async () => {
     setSubmitting(true)
     try {
-      await reviewService.createReview({ productId, rating, comment })
+      await reviewService.createReview({ product_id: productId, rating, comment })
       const data = await reviewService.getReviews(productId)
       setReviews(data)
       setComment('')

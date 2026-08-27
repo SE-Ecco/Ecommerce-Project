@@ -42,7 +42,13 @@ export const getProductById = async (id: number, shop_id: number) => {
 
   return product;
 };
-
+export const getPublicProductById = async (id: number) => {
+  const product = await Product.findOne({
+    where: { id, deleted_at: null, is_active: true },
+  });
+  if (!product) throw new Error('Product not found');
+  return product;
+};
 // ===========================
 // CREATE PRODUCT
 // ===========================
@@ -273,7 +279,7 @@ export const createFlashSale = async (
     // VERIFY product belongs to this shop
     const product = await Product.findByPk(productId);
     if (!product) throw new Error('Product not found');
-    if (product.get('shop_id') !== shopId) {
+    if (Number(product.get('shop_id')) !== shopId) {
         throw new Error('Product does not belong to this shop');
     }
 

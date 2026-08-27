@@ -18,7 +18,7 @@ const HomePage = () => {
     const fetchShops = async () => {
       try {
         const data = await getShops()
-        setShops(data)
+        setShops(data.filter((s) => s.status === 'active'))
       } catch (err: any) {
         setError(
           err?.response?.data?.message || 'Could not load shops. Please try again.'

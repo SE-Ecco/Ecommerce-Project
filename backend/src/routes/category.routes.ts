@@ -6,7 +6,7 @@
 //   POST   /api/categories             → [auth, authorize('shop_admin'), attachShopId] → createCategory()
 //   PUT    /api/categories/:id         → [auth, authorize('shop_admin'), attachShopId] → updateCategory()
 //   DELETE /api/categories/:id         → [auth, authorize('shop_admin'), attachShopId] → deleteCategory()
-import { Router } from 'express'
+import { Router, Request, Response, NextFunction } from 'express'
 import { getCategories, getCategoryById, createCategory, updateCategory, deleteCategory } from '../controllers/category.controller'
 import { authenticate } from '../middleware/auth.middleware'
 import { authorize } from '../middleware/role.middleware'
@@ -17,9 +17,26 @@ import { upload } from '../middleware/upload.middleware'
 
 const router = Router()
 
-// public — shopMiddleware gives shop context without needing login
-router.get('/', shopMiddleware, getCategories)
-router.get('/:id', shopMiddleware, getCategoryById)
+// public — shop_id from query param, no login needed
+router.get('/', (req: Request, res: Response, next: NextFunction) => {
+  const shopId = Number(req.query.shop_id)
+  if (!shopId) {
+    res.status(400).json({ success: false, message: 'shop_id is required' })
+    return
+  }
+  req.user = { shop_id: shopId } as any
+  next()
+}, getCategories)
+
+router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
+  const shopId = Number(req.query.shop_id)
+  if (!shopId) {
+    res.status(400).json({ success: false, message: 'shop_id is required' })
+    return
+  }
+  req.user = { shop_id: shopId } as any
+  next()
+}, getCategoryById)
 
 // protected — must be logged in AND be shop_admin
 router.post('/', authenticate, authorize('shop_admin'), shopMiddleware, upload('categories').single('image'), createCategoryValidation, validateMiddleware, createCategory)

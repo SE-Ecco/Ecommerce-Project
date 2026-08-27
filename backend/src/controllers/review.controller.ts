@@ -27,10 +27,16 @@ export const createReview = async (
 ) => {
     try {
         const userId = req.user?.id;
-        const { productId, rating, comment } = req.body; // 🔧 orderId removed
+        const { productId: rawProductId, rating, comment } = req.body;
+        const productId = Number(rawProductId);
 
         if (!userId) {
             res.status(401).json(errorResponse('User not authenticated'));
+            return;
+        }
+
+        if (!productId || isNaN(productId)) {
+            res.status(400).json(errorResponse('Valid product ID is required'));
             return;
         }
 
