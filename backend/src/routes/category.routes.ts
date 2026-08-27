@@ -8,18 +8,21 @@
 //   DELETE /api/categories/:id         → [auth, authorize('shop_admin'), attachShopId] → deleteCategory()
 import { Router } from 'express'
 import { getCategories, getCategoryById, createCategory, updateCategory, deleteCategory } from '../controllers/category.controller'
-import { authenticate  } from '../middleware/auth.middleware'
+import { authenticate } from '../middleware/auth.middleware'
+import { authorize } from '../middleware/role.middleware'
 import { shopMiddleware } from '../middleware/shop.middleware'
-import { validateMiddleware  } from '../middleware/validate.middleware'
+import { validateMiddleware } from '../middleware/validate.middleware'
 import { createCategoryValidation, updateCategoryValidation } from '../validations/category.validation'
 import { upload } from '../middleware/upload.middleware'
 
-const router = Router();
+const router = Router()
 
-router.get('/', getCategories)
-router.get('/:id', getCategoryById)
-router.post('/', authenticate, shopMiddleware, upload('categories').single('image'), createCategoryValidation, validateMiddleware, createCategory)
-router.put('/:id', authenticate, shopMiddleware, upload('categories').single('image'), updateCategoryValidation, validateMiddleware, updateCategory)
-router.delete('/:id', authenticate, shopMiddleware, deleteCategory)
+// public — shopMiddleware gives shop context without needing login
+router.get('/', shopMiddleware, getCategories)
+router.get('/:id', shopMiddleware, getCategoryById)
 
+// protected — must be logged in AND be shop_admin
+router.post('/', authenticate, authorize('shop_admin'), shopMiddleware, upload('categories').single('image'), createCategoryValidation, validateMiddleware, createCategory)
+router.put('/:id', authenticate, authorize('shop_admin'), shopMiddleware, upload('categories').single('image'), updateCategoryValidation, validateMiddleware, updateCategory)
+router.delete('/:id', authenticate, authorize('shop_admin'), shopMiddleware, deleteCategory)
 export default router

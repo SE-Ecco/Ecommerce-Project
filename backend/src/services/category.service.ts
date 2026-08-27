@@ -46,11 +46,13 @@ export const updateCategory = async (
             cloudinary_banner_public_id?: string }
 ) => {
     const category = await getCategoryById(id, shop_id);
-    await category.update(data);
+    
+    // Only allow safe fields
+    const { shop_id: _, id: __, ...safeData } = data as any;
+    await category.update(safeData);
 
     return category;
 }
-
 export const deleteCategory = async (
     id: number,
     shop_id: number

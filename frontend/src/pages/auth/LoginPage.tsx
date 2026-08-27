@@ -33,7 +33,7 @@ const LoginPage = () => {
             if(data.user.role === 'shop_admin'){
                 navigate('/owner/dashboard')
             } else if (data.user.role === 'super_admin'){
-                navigate('/admin/shops')
+               navigate('/admin/dashboard')
             } else {
                 navigate('/')
             }

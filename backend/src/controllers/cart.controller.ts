@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as cartService from '../services/cart.service';
 import { successResponse, errorResponse } from '../utils/response';
 
-export const addToCart = async (req: Request, res: Response): Promise<void> => {
+export const addToCart = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
     const user_id = req.user!.id as number;
@@ -11,22 +11,22 @@ export const addToCart = async (req: Request, res: Response): Promise<void> => {
     const item = await cartService.addToCart(user_id, shop_id, product_id, quantity);
     res.status(201).json(successResponse(item));
   } catch (error) {
-    res.status(500).json(errorResponse((error as Error).message));
+    next(error);
   }
 };
 
-export const getCart = async (req: Request, res: Response): Promise<void> => {
+export const getCart = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const shop_id = req.user!.shop_id as number;
     const user_id = req.user!.id as number;
     const cart = await cartService.getCart(user_id, shop_id);
     res.status(200).json(successResponse(cart));
   } catch (error) {
-    res.status(500).json(errorResponse((error as Error).message));
+    next(error);
   }
 };
 
-export const updateQuantity = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+export const updateQuantity = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user_id = req.user!.id as number;
     const id = Number(req.params.id);
@@ -34,22 +34,20 @@ export const updateQuantity = async (req: Request<{ id: string }>, res: Response
     const item = await cartService.updateQuantity(id, user_id, quantity);
     res.status(200).json(successResponse(item));
   } catch (error) {
-    res.status(404).json(errorResponse((error as Error).message));
+    next(error);
   }
 };
 
-export const removeFromCart = async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+export const removeFromCart = async (req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user_id = req.user!.id as number;
     const id = Number(req.params.id);
     const result = await cartService.removeFromCart(id, user_id);
     res.status(200).json(successResponse(result));
   } catch (error) {
-    res.status(404).json(errorResponse((error as Error).message));
+    next(error);
   }
 };
-
-
 
 // 📖 cart.controller.ts — line by line 🛒
 

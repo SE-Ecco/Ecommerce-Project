@@ -10,6 +10,7 @@ import { formatPrice } from '../../utils/helpers'
 import { Product } from '../../types'
 import Spinner from '../../components/common/Spinner'
 import Button from '../../components/common/Button'
+import ProductReviews from '../../components/product/ProductReviews'
 
 const ProductDetailPage = () => {
   const { id } = useParams()
@@ -61,9 +62,13 @@ const ProductDetailPage = () => {
     <div className="max-w-4xl mx-auto px-4 py-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-        {/* image — no image_url in model, show placeholder */}
+        {/* image */}
         <div className="w-full h-80 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-          No image {/* 🔧 fix: image_url removed */}
+          <img
+            src={product.image_url || '/placeholder.png'}
+            alt={product.name}
+            className="w-full h-80 object-cover rounded-lg"
+          />
         </div>
 
         <div>
@@ -118,6 +123,9 @@ const ProductDetailPage = () => {
           )}
         </div>
       </div>
+
+      {/* Reviews section */}
+      <ProductReviews productId={product.id} />
     </div>
   )
 }

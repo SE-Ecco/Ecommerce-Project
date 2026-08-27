@@ -19,12 +19,15 @@ export const updateShopStatus = async (
 ) => {
     try {
         const shopId = Number(req.params.id);
-        const { is_active } = req.body;
+        const { status } = req.body;
         if (!shopId || isNaN(shopId)) throw new Error('Invalid shop ID');
-        const shop = await shopService.updateShopStatus(shopId, is_active);
+        if (!['active', 'inactive', 'suspended'].includes(status)) {
+            throw new Error('Invalid status. Must be: active, inactive, or suspended');
+        }
+        const shop = await shopService.updateShopStatus(shopId, status);
         res.status(200).json(successResponse(shop));
     } catch (error) {
-        next(error); // 🔧 fix
+        next(error);
     }
 };
 
@@ -33,7 +36,7 @@ export const getAllUsers = async (
 ) => {
     try {
         const users = await User.findAll({
-            attributes: { exclude: ['password'] } // 🔧 never expose passwords!
+            attributes: { exclude: ['password_hash'] }  // was ['password']
         });
         res.status(200).json(successResponse(users));
     } catch (error) {
@@ -45,15 +48,19 @@ export const createShop = async (
     req: Request, res: Response, next: NextFunction
 ) => {
     try {
-        const { name, slug, is_active, adminUserId } = req.body;
+        const { name, slug, status, adminUserId } = req.body;
         if (!name || !slug || !adminUserId) {
             res.status(400).json(errorResponse('Missing required fields: name, slug, adminUserId'));
             return;
         }
-        const newShop = await shopService.createShop({ name, slug, is_active }, adminUserId);
+        if (status && !['active', 'inactive', 'suspended'].includes(status)) {
+            res.status(400).json(errorResponse('Invalid status'));
+            return;
+        }
+        const newShop = await shopService.createShop({ name, slug, status: status || 'active' }, adminUserId);
         res.status(201).json(successResponse(newShop));
     } catch (error) {
-        next(error); // 🔧 fix
+        next(error);
     }
 };
 
@@ -78,7 +85,8 @@ export const changeUserRole = async (
         }
         user.set('role', role);
         await user.save();
-        res.status(200).json(successResponse(user));
+        const { password_hash, ...safeUser } = user.toJSON();
+        res.status(200).json(successResponse(safeUser));
     } catch (error) {
         next(error); // 🔧 fix
     }

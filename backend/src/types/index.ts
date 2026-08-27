@@ -8,44 +8,31 @@
 // ===========================
 
 export type Role = 'super_admin' | 'shop_admin' | 'customer'
-//     ↑              ↑                ↑               ↑
-//     share it    only these 3 values allowed
-//
-// type = defines a VALUE shape (not an object)
-// | = OR → must be one of these exactly
-// 'hacker' → ❌ TypeScript error immediately!
-
 
 // ===========================
 // USER
 // ===========================
 
 export interface User {
-//     ↑
-//     share with other files
-
-  id: number           // database row number
-  email: string        // login email
-  password: string     // hashed password
-  role: Role           // must be one of 3 roles above
-  shop_id?: number     // ? = optional (admins have it, customers don't)
-  createdAt: Date      // when they registered
+  id: number
+  name: string          // ADD: user display name
+  email: string
+  password_hash: string // FIX: was 'password', model uses 'password_hash'
+  role: Role
+  shop_id?: number
+  created_at: Date      // FIX: was 'createdAt', model uses snake_case
 }
-
 
 // ===========================
 // TOKEN PAYLOAD
 // ===========================
 
 export interface TokenPayload {
-  id: number           // who is this token for?
-  email: string        // their email
-  role: Role           // their role
-  shop_id?: number     // their shop (if shop_admin)
+  id: number
+  email: string
+  role: Role
+  shop_id?: number
 }
-// this is what lives INSIDE the JWT token
-// auth.middleware reads this when token arrives
-
 
 // ===========================
 // SHOP
@@ -53,13 +40,15 @@ export interface TokenPayload {
 
 export interface Shop {
   id: number
-  name: string         // "Zaytoon Store"
-  slug: string         // "zaytoon-store" (URL friendly name)
-  description?: string // optional shop description
-  isActive: boolean    // true = open, false = closed by admin
-  createdAt: Date
+  name: string
+  slug: string
+  email: string                    // ADD: shop email
+  phone?: string                   // ADD: shop phone
+  cloudinary_logo_url?: string     // ADD: logo URL
+  cloudinary_logo_public_id?: string // ADD: for deletion
+  status: 'active' | 'inactive' | 'suspended'  // FIX: was isActive: boolean
+  created_at: Date                 // FIX: was 'createdAt'
 }
-
 
 // ===========================
 // CATEGORY
@@ -67,10 +56,12 @@ export interface Shop {
 
 export interface Category {
   id: number
-  name: string         // "Electronics", "Food"
-  shop_id: number      // which shop owns this category
+  name: string
+  slug: string                     // ADD: URL-friendly name
+  shop_id: number
+  parent_id?: number               // ADD: for subcategories
+  cloudinary_banner_url?: string   // ADD: banner image
 }
-
 
 // ===========================
 // PRODUCT
@@ -79,16 +70,17 @@ export interface Category {
 export interface Product {
   id: number
   name: string
-  description?: string  // optional
-  price: number         // in IQD
-  stock: number         // how many left
-  image?: string        // Cloudinary URL (optional)
-  isActive: boolean     // visible to customers?
-  shop_id: number       // which shop sells this
-  category_id?: number  // optional category
-  createdAt: Date
+  description?: string
+  price: number
+  stock: number
+  image_url?: string               // FIX: was 'image'
+  is_active: boolean               // FIX: was 'isActive: boolean'
+  shop_id: number
+  category_id?: number
+  attributes?: object              // ADD: JSONB flexible attributes
+  deleted_at?: Date                // ADD: soft delete
+  created_at: Date                 // FIX: was 'createdAt'
 }
-
 
 // ===========================
 // ORDER
@@ -96,13 +88,15 @@ export interface Product {
 
 export interface Order {
   id: number
-  status: string        // "pending", "confirmed", "delivered"
-  total: number         // total price in IQD
-  shop_id: number       // which shop got this order
-  user_id: number       // who placed the order
-  createdAt: Date
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  total_amount: number             // FIX: was 'total'
+  discount_amount: number          // ADD: missing field
+  shop_id: number
+  user_id: number
+  address_id?: number              // ADD: missing field
+  notes?: string                   // ADD: missing field
+  created_at: Date                 // FIX: was 'createdAt'
 }
-
 
 // ===========================
 // ORDER ITEM
@@ -110,25 +104,19 @@ export interface Order {
 
 export interface OrderItem {
   id: number
-  order_id: number      // which order
-  product_id: number    // which product
-  quantity: number      // how many
-  unit_price: number    // price AT TIME of order (snapshot!)
+  order_id: number
+  product_id: number
+  variant_id?: number              // ADD: missing field
+  quantity: number
+  unit_price: number
 }
-// unit_price = snapshot because:
-// product price changes tomorrow → old order still shows original price ✅
-// just like a real receipt 🧾
-
 
 // ===========================
 // API RESPONSE
 // ===========================
 
 export interface ApiResponse {
-  success: boolean      // true or false
-  data?: any            // the actual result (optional)
-  message?: string      // error or success message (optional)
+  success: boolean
+  data?: any
+  message?: string
 }
-// every controller uses this format:
-// success: { success: true, data: [...] }
-// error:   { success: false, message: "not found" }

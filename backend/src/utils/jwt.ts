@@ -3,34 +3,21 @@
 // USED BY: services/auth.service.ts (generate), middleware/auth.middleware.ts (verify)
 // CONTAINS: generateToken(payload), verifyToken(token)
 import jwt from 'jsonwebtoken'
-import { env } from 'src/config/env'
+import { env } from '../config/env'
 import { TokenPayload } from '../types'
 
 export const generateToken = (payload: TokenPayload): string => {
     return jwt.sign(
-        payload,                // data stored inside token
-        env.JWT_SECRET,         // secret key used to sign token
-        {expiresIn: '7d'}       // token expired in 7 days
-        
+        payload,
+        env.JWT_SECRET,
+        {expiresIn: '7d'}
     )
 }
 
-/*
-    This function creates a JWT token for a user
-
-    (payload: object) 
-        -> function parameter called payload
-        -> must be an object
-        -> contains data like: id, email, role
-    
-    
-    : string -> function returns a string
-*/
-
 export const verifyToken = (token: string) => {
     return jwt.verify(
-        token,              // token to check
-        env.JWT_SECRET      //same secret key used when token was created
+        token,
+        env.JWT_SECRET
     )
 }
 

@@ -10,7 +10,7 @@ export const getReviews = async (productId: number) => {
 }
 
 export const createReview = async (data: {
-  productId: number
+  product_id: number
   rating: number
   comment?: string
   orderId?: number

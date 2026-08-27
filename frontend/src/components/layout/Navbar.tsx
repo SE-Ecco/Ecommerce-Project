@@ -1,41 +1,43 @@
-// WHAT: Top navigation bar — logo, shop name, cart icon with count, user menu
-// IMPORTS: hooks/useAuth, hooks/useCart, react-router-dom, @mui/material, framer-motion
-// USED BY: MainLayout.tsx
-
-
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { Badge } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { motion } from "framer-motion";
+import CartDrawer from "../cart/CartDrawer";
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { totalItems } = useCart();
+  const [cartOpen, setCartOpen] = useState(false);
 
   return (
-    <motion.nav
-      initial={{ y: -50, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-    >
-      <Link to="/">jiwar</Link>
+    <>
+      <motion.nav
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+      >
+        <Link to="/">jiwar</Link>
 
-      <Link to="/cart">
-        <Badge badgeContent={totalItems} color="error">
-          <ShoppingCartIcon />
-        </Badge>
-      </Link>
+        <button onClick={() => setCartOpen(true)}>
+          <Badge badgeContent={totalItems} color="error">
+            <ShoppingCartIcon />
+          </Badge>
+        </button>
 
-      {isAuthenticated ? (
-        <span>
-          Hi, {user?.name}
-          <button onClick={logout}>Logout</button>
-        </span>
-      ) : (
-        <Link to="/login">Login</Link>
-      )}
-    </motion.nav>
+        {isAuthenticated ? (
+          <span>
+            Hi, {user?.name}
+            <button onClick={logout}>Logout</button>
+          </span>
+        ) : (
+          <Link to="/login">Login</Link>
+        )}
+      </motion.nav>
+
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+    </>
   );
 };
 

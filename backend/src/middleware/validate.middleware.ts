@@ -3,7 +3,7 @@
 // USED BY: routes/auth.routes.ts, routes/product.routes.ts, routes/order.routes.ts
 // FLOW: validation rules run → validate() checks results → error? send 400 : call next()
 // EXPORTS: validate()
-import { Request, Response, NextFunction, request } from 'express'
+import { Request, Response, NextFunction} from 'express'
 
 import { validationResult } from 'express-validator'
 // brings a function that COLLECTS all validation errors

@@ -9,6 +9,7 @@
 //   DELETE /api/products/:id            → [auth, authorize('shop_admin'), attachShopId]         → deleteProduct()
 import { Router } from 'express'
 import { authenticate } from '../middleware/auth.middleware'
+import { authorize } from '../middleware/role.middleware'
 import { shopMiddleware } from '../middleware/shop.middleware'
 import { validateMiddleware } from '../middleware/validate.middleware'
 import {
@@ -26,34 +27,38 @@ import {
     getProductImages, addProductImage, setPrimaryImage, deleteProductImage,
     logSearch, logProductView,
     addTags, getProductsByTagHandler,
-    createFlashSaleHandler, getActiveFlashSaleHandler,getProductsByShopSlug
+    createFlashSaleHandler, getActiveFlashSaleHandler, getProductsByShopSlug
 } from '../controllers/product.controller'
 
 const router = Router()
+
 // PUBLIC — no auth needed → customers can browse
 router.get('/shop/:slug', getProductsByShopSlug)
+
+// VENDOR ANALYTICS — auth required but not role-restricted
 router.post('/:id/views', authenticate, shopMiddleware, logProductView)
 router.post('/search-log', authenticate, shopMiddleware, logSearch)
-router.get('/', authenticate, shopMiddleware, getProducts)
-router.get('/tags/:tagName', authenticate, shopMiddleware, getProductsByTagHandler)
-router.get('/:id', authenticate, shopMiddleware, getProductById)
-router.get('/:id/flash-sale', authenticate, shopMiddleware, getActiveFlashSaleHandler)
-router.get('/:id/images', authenticate, shopMiddleware, getProductImages)
-router.get('/:id/variants', authenticate, shopMiddleware, getVariants)
-router.post('/', authenticate, shopMiddleware, upload('products').single('image'), createProductValidation, validateMiddleware, createProduct)
-router.post('/:id/flash-sale', authenticate, shopMiddleware, createFlashSaleValidation, validateMiddleware, createFlashSaleHandler)
-router.post('/:id/variants', authenticate, shopMiddleware, createVariantValidation, validateMiddleware, createVariant)
-router.post('/:id/tags', authenticate, shopMiddleware, addTagsValidation, validateMiddleware, addTags)
-router.post('/:id/images', authenticate, shopMiddleware, upload('products').single('image'), addProductImage)
-router.put('/:id', authenticate, shopMiddleware, upload('products').single('image'), updateProductValidation, validateMiddleware, updateProduct)
-router.put('/:id/variants/:variantId', authenticate, shopMiddleware, updateVariantValidation, validateMiddleware, updateVariant)
-router.patch('/:id/images/:imageId/primary', authenticate, shopMiddleware, setPrimaryImage)
-router.delete('/:id', authenticate, shopMiddleware, deleteProduct)
-router.delete('/:id/variants/:variantId', authenticate, shopMiddleware, deleteVariant)
-router.delete('/:id/images/:imageId', authenticate, shopMiddleware, deleteProductImage)
+
+// VENDOR ONLY — require shop_admin role
+router.get('/', authenticate, authorize('shop_admin'), shopMiddleware, getProducts)
+router.get('/tags/:tagName', authenticate, authorize('shop_admin'), shopMiddleware, getProductsByTagHandler)
+router.get('/:id', authenticate, authorize('shop_admin'), shopMiddleware, getProductById)
+router.get('/:id/flash-sale', authenticate, authorize('shop_admin'), shopMiddleware, getActiveFlashSaleHandler)
+router.get('/:id/images', authenticate, authorize('shop_admin'), shopMiddleware, getProductImages)
+router.get('/:id/variants', authenticate, authorize('shop_admin'), shopMiddleware, getVariants)
+router.post('/', authenticate, authorize('shop_admin'), shopMiddleware, upload('products').single('image'), createProductValidation, validateMiddleware, createProduct)
+router.post('/:id/flash-sale', authenticate, authorize('shop_admin'), shopMiddleware, createFlashSaleValidation, validateMiddleware, createFlashSaleHandler)
+router.post('/:id/variants', authenticate, authorize('shop_admin'), shopMiddleware, createVariantValidation, validateMiddleware, createVariant)
+router.post('/:id/tags', authenticate, authorize('shop_admin'), shopMiddleware, addTagsValidation, validateMiddleware, addTags)
+router.post('/:id/images', authenticate, authorize('shop_admin'), shopMiddleware, upload('products').single('image'), addProductImage)
+router.put('/:id', authenticate, authorize('shop_admin'), shopMiddleware, upload('products').single('image'), updateProductValidation, validateMiddleware, updateProduct)
+router.put('/:id/variants/:variantId', authenticate, authorize('shop_admin'), shopMiddleware, updateVariantValidation, validateMiddleware, updateVariant)
+router.patch('/:id/images/:imageId/primary', authenticate, authorize('shop_admin'), shopMiddleware, setPrimaryImage)
+router.delete('/:id', authenticate, authorize('shop_admin'), shopMiddleware, deleteProduct)
+router.delete('/:id/variants/:variantId', authenticate, authorize('shop_admin'), shopMiddleware, deleteVariant)
+router.delete('/:id/images/:imageId', authenticate, authorize('shop_admin'), shopMiddleware, deleteProductImage)
 
 export default router
-
 // 📖 product.routes.ts — FULL explanation, every route 🎬
 
 // 🎭 the big picture

@@ -5,12 +5,12 @@
 import api from './api'
 
 export const getNotifications = async () => {
-  const response = await api.get('/notifications')
+  const response = await api.get('/notifications/my-notifications')
   return response.data.data
 }
 
 export const markAsRead = async (id: number) => {
-  const response = await api.patch(`/notifications/${id}`)
+  const response = await api.patch(`/notifications/${id}/read`)
   return response.data.data
 }
 

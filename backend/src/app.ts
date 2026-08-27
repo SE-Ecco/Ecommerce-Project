@@ -3,6 +3,8 @@
 // USED BY: server.ts
 // ORDER MATTERS: cors → helmet → rateLimiter → body-parser → routes → error handler (last!)
 
+import helmet from 'helmet';
+import { globalLimiter } from './middleware/rateLimiter.middleware';
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -20,13 +22,16 @@ import reviewRoutes from './routes/review.routes';
 import shippingRoutes from './routes/shipping.routes';
 import shopSettingsRoutes from './routes/shop-setting.routes'; // 🔧 added
 import { errorMiddleware } from './middleware/error.middleware'; // 🔧 added
-
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true
+}));
+app.use(helmet());
 app.use(morgan('dev'));
-app.use(express.json());
-
+app.use(express.json({ limit: '10mb' }));
+app.use(globalLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/shops', shops);
 app.use('/api/products', products);

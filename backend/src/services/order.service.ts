@@ -4,14 +4,14 @@
 
 import { Order, OrderItem } from '../models/Order-OrderItem';
 import Product from '../models/Product';
+import ProductVariant from '../models/Productvariant';
 import sequelize from '../config/database';
-import  PaymentTransaction  from '../models/Paymenttransaction';
+import PaymentTransaction from '../models/Paymenttransaction';
 
-// ── PLACE ORDER ──────────────────────────────────────────────
 export const placeOrder = async (
     userId: number,
     shopId: number,
-    items: { product_id: number; quantity: number }[],
+    items: { product_id: number; quantity: number; variant_id?: number }[],
     addressId: number | null,
     notes: string | null
 ) => {
@@ -27,6 +27,7 @@ export const placeOrder = async (
             product_id: number;
             quantity: number;
             unit_price: number;
+            variant_id?: number;
         }[] = [];
 
         for (const item of items) {
@@ -36,8 +37,28 @@ export const placeOrder = async (
                 throw new Error(`Product ${item.product_id} not found`);
             }
 
-            if (product.get('stock') < item.quantity) {
-                throw new Error(`Not enough stock for product ${item.product_id}`);
+            let unitPrice = Number(product.get('price'));
+
+            if (item.variant_id) {
+                const variant = await ProductVariant.findOne({
+                    where: { id: item.variant_id, product_id: item.product_id },
+                    transaction
+                });
+                if (!variant) {
+                    throw new Error(`Variant ${item.variant_id} not found for product ${item.product_id}`);
+                }
+                if (variant.get('stock') < item.quantity) {
+                    throw new Error(`Not enough stock for variant ${item.variant_id}`);
+                }
+                unitPrice = Number(variant.get('price'));
+                await ProductVariant.decrement(
+                    { stock: item.quantity },
+                    { where: { id: item.variant_id }, transaction }
+                );
+            } else {
+                if (product.get('stock') < item.quantity) {
+                    throw new Error(`Not enough stock for product ${item.product_id}`);
+                }
             }
 
             const productShopId = product.get('shop_id') as number;
@@ -45,13 +66,13 @@ export const placeOrder = async (
                 throw new Error(`product ${item.product_id} does not belong to this shop`);
             }
 
-            const unitPrice = Number(product.get('price'));
             totalAmount += unitPrice * item.quantity;
 
             orderItemsData.push({
                 product_id: item.product_id,
                 quantity: item.quantity,
                 unit_price: unitPrice,
+                variant_id: item.variant_id,
             });
         }
 
@@ -73,16 +94,19 @@ export const placeOrder = async (
                 {
                     order_id: order.get('id'),
                     product_id: itemData.product_id,
+                    variant_id: itemData.variant_id,
                     quantity: itemData.quantity,
                     unit_price: itemData.unit_price,
                 },
                 { transaction }
             );
 
-            await Product.decrement(
-                { stock: itemData.quantity },
-                { where: { id: itemData.product_id }, transaction }
-            );
+            if (!itemData.variant_id) {
+                await Product.decrement(
+                    { stock: itemData.quantity },
+                    { where: { id: itemData.product_id }, transaction }
+                );
+            }
         }
 
         await transaction.commit();
@@ -93,7 +117,6 @@ export const placeOrder = async (
     }
 };
 
-// ── GET MY ORDERS ────────────────────────────────────────────
 export const getMyOrders = async (userId: number) => {
     return Order.findAll({
         where: { user_id: userId },
@@ -102,7 +125,6 @@ export const getMyOrders = async (userId: number) => {
     });
 };
 
-// ── GET SHOP ORDERS ──────────────────────────────────────────
 export const getShopOrders = async (shopId: number) => {
     return Order.findAll({
         where: { shop_id: shopId },
@@ -111,7 +133,6 @@ export const getShopOrders = async (shopId: number) => {
     });
 };
 
-// ── UPDATE ORDER STATUS ──────────────────────────────────────
 export const updateStatus = async (
     orderId: number,
     shopId: number,
@@ -127,16 +148,8 @@ export const updateStatus = async (
 
     order.set('status', newStatus);
     await order.save();
-
     return order;
 };
-
-
-/*
-    ====================
-    Payment transaction
-    ====================
-*/
 
 export const createPaymentTransaction = async (
     orderId: number,
@@ -144,12 +157,16 @@ export const createPaymentTransaction = async (
     amount: number,
     paymentMethod: string
 ) => {
+    const order = await Order.findOne({
+        where: { id: orderId, shop_id: shopId }
+    });
+    if (!order) throw new Error('Order not found or not yours');
+
     return await PaymentTransaction.create({
         order_id: orderId,
         shop_id: shopId,
         amount,
         payment_method: paymentMethod
-        // status left out on purpose → defaults to 'pending' (single source of truth ✅)
     });
 };
 
@@ -159,19 +176,14 @@ export const updatePaymentStatus = async (
     status: 'completed' | 'failed' | 'refunded',
     transactionRef: string | null
 ) => {
-    // 1. find the transaction — must belong to THIS shop 🔒
     const transaction = await PaymentTransaction.findOne({
         where: { id: transactionId, shop_id: shopId }
     });
 
-    // 2. not found or wrong shop → throw
     if (!transaction) throw new Error('Payment transaction not found');
 
-    // 3. update status + reference
     transaction.status = status;
     transaction.transaction_ref = transactionRef;
     await transaction.save();
-
-    // 4. return updated transaction
     return transaction;
 };

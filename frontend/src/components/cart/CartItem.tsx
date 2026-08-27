@@ -21,7 +21,7 @@ const CartItem = ({ item }: Props) => {
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1 }}>
       {/* image */}
       <img
-        src='/placeholder.png'
+        src={item.product.image_url || '/placeholder.png'}
         alt={item.product.name}
         style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }}
       />

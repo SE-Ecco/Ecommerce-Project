@@ -80,18 +80,16 @@ export const createProduct = async (
 export const updateProduct = async (
   id: number,
   shop_id: number,
-  data: object // partial update — any combination of fields
+  data: object
 ) => {
-  // first find product → throws if not found or wrong shop 🔒
   const product = await getProductById(id, shop_id);
 
-  // update() → only changes fields provided in data
-  // other fields stay the same ✅
-  await product.update(data);
+  // Strip dangerous fields — only allow safe updates
+  const { shop_id: _, id: __, created_at: ___, ...safeData } = data as any;
+  await product.update(safeData);
 
-  return product; // returns updated product
+  return product;
 };
-
 // ===========================
 // DELETE PRODUCT
 // ===========================
@@ -272,6 +270,13 @@ export const createFlashSale = async (
     startsAt: Date,
     endsAt: Date
 ) => {
+    // VERIFY product belongs to this shop
+    const product = await Product.findByPk(productId);
+    if (!product) throw new Error('Product not found');
+    if (product.get('shop_id') !== shopId) {
+        throw new Error('Product does not belong to this shop');
+    }
+
     return await FlashSale.create({
         shop_id: shopId,
         product_id: productId,

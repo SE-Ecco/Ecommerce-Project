@@ -1,9 +1,3 @@
-// WHAT: One product displayed in a card with image, name, price, add-to-cart button
-// IMPORTS: hooks/useCart, utils/helpers, framer-motion, @mui/material
-// USED BY: components/product/ProductGrid.tsx
-// SHOWS: image, name, price, stock status (is_available), Add to Cart button
-
-
 import { Card, CardMedia, CardContent, CardActions, Typography } from '@mui/material'
 import { Link } from 'react-router-dom'
 import { useCart } from '../../hooks/useCart'
@@ -27,7 +21,7 @@ const ProductCard = ({ product }: Props) => {
       <CardMedia
         component="img"
         height="200"
-        image='/placeholder.png'
+        image={product.image_url || '/placeholder.png'}
         alt={product.name}
       />
       <CardContent sx={{ flexGrow: 1 }}>

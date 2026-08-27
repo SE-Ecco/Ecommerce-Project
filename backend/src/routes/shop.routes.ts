@@ -7,17 +7,16 @@
 //   GET /api/shops/:id/products     → getShopProducts()
 //   GET /api/shops/:id/categories   → getShopCategories()-
 
-import { getAllShops,getShopBySlug } from '../controllers/shop.controller'
-
+import { getAllShops, getShopBySlug, getShopById } from '../controllers/shop.controller'
 import { Router } from 'express'
 
 const router = Router()
 
 router.get('/', getAllShops)
 router.get('/slug/:slug', getShopBySlug)
+router.get('/:id', getShopById)
 
 export default router
-
 
 // 📖 shop.routes.ts 
 // 📖 shop.routes.ts — step by step 🍽️

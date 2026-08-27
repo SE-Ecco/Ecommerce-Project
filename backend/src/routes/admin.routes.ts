@@ -12,20 +12,19 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
 import { authorize } from '../middleware/role.middleware';
+import { validateMiddleware } from '../middleware/validate.middleware';
+import { createShopValidation } from '../validations/shop.validation';
 import * as adminController from '../controllers/admin.controller';
 
 const router = Router();
 
-router.post('/shops', authenticate, authorize('super_admin'), adminController.createShop);
+router.post('/shops', authenticate, authorize('super_admin'), createShopValidation, validateMiddleware, adminController.createShop);
 
 router.get('/shops', authenticate, authorize('super_admin'), adminController.getAllShops);
 
 router.patch('/shops/:id/status', authenticate, authorize('super_admin'), adminController.updateShopStatus);
 
 router.get('/users', authenticate, authorize('super_admin'), adminController.getAllUsers);
-
-
-// New routes after updates.
 
 router.patch('/users/:id/role', authenticate, authorize('super_admin'), adminController.changeUserRole);
 

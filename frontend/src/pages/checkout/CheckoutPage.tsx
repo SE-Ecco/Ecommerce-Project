@@ -7,7 +7,7 @@
 // PROTECTED: role = customer
 
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { useCart } from '../../hooks/useCart'
 import { placeOrder } from '../../services/orderService'
 import { getAddresses } from '../../services/addressService'
@@ -75,8 +75,7 @@ const CheckoutPage = () => {
   )
 
   if (items.length === 0) {
-    navigate('/')
-    return null
+    return <Navigate to="/" replace />
   }
 
   return (

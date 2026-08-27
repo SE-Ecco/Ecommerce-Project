@@ -80,7 +80,7 @@ shop.init(
     },
     status: {
       type: DataTypes.ENUM('active', 'inactive', 'suspended'), // only these 3 values allowed
-      defaultValue: 'inactive',    // new shops are active by default ✅
+      defaultValue: 'active',    // new shops are active by default ✅
                                  // super_admin can suspend to block a shop 🛑
     },
   },

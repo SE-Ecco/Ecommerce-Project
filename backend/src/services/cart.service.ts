@@ -43,12 +43,15 @@ export const updateQuantity = async (
         throw new Error('Cart item not found');
     }
 
+    if (!quantity || quantity < 1) {
+        throw new Error('Quantity must be at least 1');
+    }
+
     item.set('quantity', quantity);
     await item.save();
 
     return item;
 };
-
 
 export const removeFromCart = async (
     id: number,

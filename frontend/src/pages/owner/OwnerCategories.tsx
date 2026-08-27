@@ -1,83 +1,35 @@
-// WHAT: Shop admin manages product categories — add/edit/delete
-// IMPORTS: services/categoryService, components/category/CategoryForm, hooks/useAuth
-// PROTECTED: role = shop_admin only
-
 import { useEffect, useState } from 'react'
 import {
   getCategories,
-  createCategory,
-  updateCategory,
   deleteCategory,
 } from '../../services/categoryService'
 import { Category } from '../../types'
 import Spinner from '../../components/common/Spinner'
-import Input from '../../components/common/Input'
+import CategoryForm from '../../components/category/CategoryForm'
 import Button from '../../components/common/Button'
 
 const OwnerCategories = () => {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-
-  const [newName, setNewName] = useState('')
-  const [adding, setAdding] = useState(false)
-
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [editName, setEditName] = useState('')
+
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories()
+      setCategories(data)
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message || 'Could not load categories.'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await getCategories()
-        setCategories(data)
-      } catch (err: any) {
-        setError(
-          err?.response?.data?.message || 'Could not load categories.'
-        )
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchCategories()
   }, [])
-
-  const handleAdd = async () => {
-    if (!newName.trim()) return
-    setAdding(true)
-    try {
-      const created = await createCategory({ name: newName.trim() })
-      setCategories((prev) => [...prev, created])
-      setNewName('')
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Could not add category.')
-    } finally {
-      setAdding(false)
-    }
-  }
-
-  const startEdit = (category: Category) => {
-    setEditingId(category.id)
-    setEditName(category.name)
-  }
-
-  const cancelEdit = () => {
-    setEditingId(null)
-    setEditName('')
-  }
-
-  const handleSaveEdit = async (id: number) => {
-    if (!editName.trim()) return
-    try {
-      const updated = await updateCategory(id, { name: editName.trim() })
-      setCategories((prev) =>
-        prev.map((c) => (c.id === id ? updated : c))
-      )
-      cancelEdit()
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Could not update category.')
-    }
-  }
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this category?')) return
@@ -107,18 +59,9 @@ const OwnerCategories = () => {
         </div>
       )}
 
-      <div className="flex gap-2 mb-8">
-        <div className="flex-1">
-          <Input
-            name="newCategory"
-            label="New category name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-          />
-        </div>
-        <Button onClick={handleAdd} disabled={adding}>
-          Add
-        </Button>
+      {/* Add form */}
+      <div className="mb-8 border rounded-lg p-4 bg-white">
+        <CategoryForm onSuccess={fetchCategories} />
       </div>
 
       {categories.length === 0 ? (
@@ -131,25 +74,20 @@ const OwnerCategories = () => {
               className="border rounded-lg p-3 bg-white flex justify-between items-center"
             >
               {editingId === category.id ? (
-                <div className="flex-1 flex gap-2 items-center">
-                  <Input
-                    name="editCategory"
-                    label=""
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
+                <div className="flex-1">
+                  <CategoryForm
+                    category={category}
+                    onSuccess={() => {
+                      fetchCategories()
+                      setEditingId(null)
+                    }}
                   />
-                  <Button onClick={() => handleSaveEdit(category.id)}>
-                    Save
-                  </Button>
-                  <Button variant="outlined" onClick={cancelEdit}>
-                    Cancel
-                  </Button>
                 </div>
               ) : (
                 <>
                   <span>{category.name}</span>
                   <div className="flex gap-2">
-                    <Button variant="outlined" onClick={() => startEdit(category)}>
+                    <Button variant="outlined" onClick={() => setEditingId(category.id)}>
                       Edit
                     </Button>
                     <Button

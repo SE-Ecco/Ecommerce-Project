@@ -109,7 +109,11 @@ const OwnerProducts = () => {
 
               {/* no image_url in model → always show placeholder 🔧 */}
               <div className="w-full h-32 bg-gray-100 rounded mb-3 flex items-center justify-center text-gray-400 text-sm">
-                No image
+                <img
+                  src={product.image_url || '/placeholder.png'}
+                  alt={product.name}
+                  className="w-full h-32 object-cover rounded mb-3"
+                />
               </div>
 
               <h2 className="font-semibold truncate">{product.name}</h2>
@@ -118,11 +122,10 @@ const OwnerProducts = () => {
               </p>
 
               <span
-                className={`inline-block mt-1 text-xs px-2 py-1 rounded ${
-                  product.is_available && product.stock > 0
+                className={`inline-block mt-1 text-xs px-2 py-1 rounded ${product.is_available && product.stock > 0
                     ? 'bg-green-100 text-green-700'
                     : 'bg-red-100 text-red-700'
-                }`}
+                  }`}
               >
                 {product.is_available && product.stock > 0
                   ? `${product.stock} in stock`

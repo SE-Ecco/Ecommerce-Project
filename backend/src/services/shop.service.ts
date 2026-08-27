@@ -2,8 +2,8 @@
 // IMPORTS: models/Shop.ts
 // USED BY: controllers/shop.controller.ts
 
-import Shop from '../models/Shop'; // Sequelize model — talks to shops table in DB
-import  sequelize  from '../config/database'; // Sequelize instance for transactions
+import Shop from '../models/Shop';
+import sequelize from '../config/database';
 import { User } from '../models';
 
 // ===========================
@@ -11,10 +11,8 @@ import { User } from '../models';
 // ===========================
 
 export const getShopsList = async () => {
-  // findAll() → SELECT * FROM shops → returns array of all shop rows
-  // no WHERE clause → returns every shop regardless of status
-  const shops = await Shop.findAll();
-  return shops; // array of Shop objects → controller wraps in successResponse
+      const shops = await Shop.findAll();
+      return shops;
 };
 
 // ===========================
@@ -22,31 +20,31 @@ export const getShopsList = async () => {
 // ===========================
 
 export const getShopBySlugFromDB = async (slug: string) => {
-  // slug comes from URL → /api/shops/slug/zaytoon-store → slug = "zaytoon-store"
-  // findOne() → SELECT * FROM shops WHERE slug = ? → returns ONE shop or null
-  const shop = await Shop.findOne({ where: { slug } });
-  // { slug } = shorthand for { slug: slug }
-
-  if (!shop) throw new Error('Shop not found');
-  // null returned → shop doesn't exist → throw error
-  // controller catches it → sends 500 error response to client 🛑
-
-  return shop; // Shop object → controller wraps in successResponse ✅
+      const shop = await Shop.findOne({ where: { slug } });
+      if (!shop) throw new Error('Shop not found');
+      return shop;
 };
 
+// ===========================
+// GET SHOP BY ID
+// ===========================
+
+export const getShopByIdFromDB = async (id: number) => {
+      const shop = await Shop.findByPk(id);
+      if (!shop) throw new Error('Shop not found');
+      return shop;
+};
 
 export const updateShopStatus = async (
       shopId: number,
-      isActive: boolean
+      status: 'active' | 'inactive' | 'suspended'
 ) => {
       const shop = await Shop.findByPk(shopId);
-      if(!shop) throw new Error('Shop not found');
-
-      shop.set('is_active', isActive);
+      if (!shop) throw new Error('Shop not found');
+      shop.set('status', status);
       await shop.save();
       return shop;
 }
-
 /* 
 ═══════════════════════════════════════════════════════════════
  📌 WHY THIS FUNCTION WAS ADDED (for the team):
@@ -74,32 +72,28 @@ export const createShop = async (
       shopData: {
             name: string;
             slug: string;
-            is_active: boolean;
-
+            status: 'active' | 'inactive' | 'suspended';
       },
-            adminUserId: number
+      adminUserId: number
 ) => {
       const transaction = await sequelize.transaction();
-
-      try{
-            // 1️⃣  Create the new shop in the shops table
+      try {
             const newShop = await Shop.create(
                   {
                         name: shopData.name,
                         slug: shopData.slug,
-                        is_active: shopData.is_active,
+                        status: shopData.status,
                   },
-                  {transaction}
+                  { transaction }
             );
-
             // 2️⃣ find the user who will become this shop's admin
-            const user = await User.findByPk(adminUserId, {transaction});
-            if(!user) throw new Error('Admin user not found');
+            const user = await User.findByPk(adminUserId, { transaction });
+            if (!user) throw new Error('Admin user not found');
 
             // 3️⃣ link the user to the new shop + promote their role
             user.set('shop_id', newShop.get('id'));
             user.set('role', 'shop_admin');
-            await user.save({transaction});
+            await user.save({ transaction });
 
             // 4️⃣ commit — shop + user update both succeeded
             await transaction.commit();

@@ -5,6 +5,7 @@ export const createReviewValidation = [
         .isInt({ min: 1 })
         .withMessage('Valid product ID is required'),
     body('orderId')
+        .optional()
         .isInt({ min: 1 })
         .withMessage('Valid order ID is required'),
     body('rating')
